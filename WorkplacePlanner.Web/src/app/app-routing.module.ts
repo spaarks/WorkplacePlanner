@@ -19,8 +19,24 @@ export const routes: Routes = [
     children: [
       {
         path: 'dashboard',
-        loadChildren: './dashboard/dashboard.module#DashboardModule'
+        loadChildren: './calendar/calendar.module#CalendarModule'
+        
       },
+      {
+        path: 'teams',
+        loadChildren: './teams/teams.module#TeamsModule',
+        data: {
+          title: "Teams"
+        }
+      },
+      {
+        path: 'members',
+        loadChildren: './members/members.module#MembersModule'
+      },
+      {
+        path: 'reports',
+        loadChildren: './reports/reports.module#ReportsModule'
+      }
     ]
   }
 ];

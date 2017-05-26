@@ -1,0 +1,47 @@
+<ft-page-header [subTitle]="'Monthly Desk Occupancy'" [buttonName]="'Back'" (buttonClicked)="back($event)"  ></ft-page-header>
+<div class="row ">
+    <div class="col-sm-3"><h3> Year:  <ft-year-picker (yearChanged)="yearChanged($event)"></ft-year-picker> </h3> </div>
+    <div class="col-sm-3"><h3> Team: Team 1 </h3></div>
+</div>
+<hr>
+<div class="row"> 
+    <div class="col-sm-6"> 
+        <table class="table table-striped table-condensed">
+            <thead>
+                <tr>
+                    <th class="text-center">
+                        Month
+                    </th>
+                    <th class="text-center">
+                        In Office
+                    </th>
+                    <th class="text-center">
+                        WFH
+                    </th>
+                    <th class="text-center">
+                        Out of Office
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let teamMonthlyDeskOccupancy of teamMonthlyDeskOccupancies">
+                    <td class="text-center">
+                        {{teamMonthlyDeskOccupancy.month}}
+                    </td>
+                    <td class="text-center">
+                        {{teamMonthlyDeskOccupancy.io}}
+                    </td>
+                    <td class="text-center">
+                        {{teamMonthlyDeskOccupancy.wfh}}
+                    </td>
+                    <td class="text-center">
+                        {{teamMonthlyDeskOccupancy.oo}}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="col-sm-6"> 
+        <p-chart *ngIf="data" type="horizontalBar" [data]="data" [options]="options" > </p-chart>
+    </div>
+</div>

@@ -1,0 +1,39 @@
+.calendar-today {
+    background-color: white;
+    color: black;
+}
+
+.calendar-date-col {
+   min-width: 45px; 
+   max-width: 45px;  
+}
+
+.calendar-usage-cell {
+    padding: 0;
+}
+
+.comment-icon {
+    margin-top: -6px;
+    margin-right: -2px;
+    color: darkred;
+    cursor: pointer;
+    float: right;
+}
+ 
+.legend-icon {
+    width: 40px;
+    height: 30px;
+    border: 1px solid #ddd;
+}
+
+.legend-text {
+    padding: 5px 20px 5px 5px;
+}
+
+.fa-rotate-45 {
+    -webkit-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    transform: rotate(45deg);
+}

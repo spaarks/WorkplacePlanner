@@ -1,9 +1,9 @@
 <header class="app-header navbar">
-    <button class="navbar-toggler mobile-sidebar-toggler d-lg-none" type="button">&#9776;</button>
+    <button class="navbar-toggler mobile-sidebar-toggler d-lg-none" type="button" appMobileSidebarToggler>&#9776;</button>
     <a class="navbar-brand" href="#"></a>
     <ul class="nav navbar-nav mr-auto d-md-down-none">
         <li class="nav-item">
-            <a class="nav-link navbar-toggler sidebar-toggler" href="#">&#9776;</a>
+            <a class="nav-link navbar-toggler sidebar-toggler" href="#" appSidebarToggler>&#9776;</a>
         </li>
     </ul>
 </header>
@@ -14,6 +14,9 @@
             <ul class="nav">
                 <li class="nav-item">
                     <a class="nav-link" routerLinkActive="active" [routerLink]="['/dashboard']"><i class="icon-speedometer"></i> Dashboard <span class="badge badge-info">NEW</span></a>
+                    <a class="nav-link" routerLinkActive="active" [routerLink]="['/teams']"><i class="icon-speedometer"></i> Teams </a>
+                    <a class="nav-link" routerLinkActive="active" [routerLink]="['/members']"><i class="icon-speedometer"></i> Members </a>
+                    <a class="nav-link" routerLinkActive="active" [routerLink]="['/reports']"><i class="icon-speedometer"></i> Reports </a>
                 </li>
             </ul>
         </nav>

@@ -1,0 +1,24 @@
+<form (ngSubmit)="onSubmit()" #editForm="ngForm">
+    <div class="form-group">
+        <label> Person: </label> {{ person.name }}
+    </div>
+    <div class="form-group">
+        <label> Date: </label> {{ deskUsageEntry.date | date: 'fullDate'}}
+    </div>
+    <div class="form-group">
+        <label> End Date: </label> 
+        <input type="date" class="form-control" [ngModel]="selectedEndDate | date:'y-MM-dd'" min="{{deskUsageEntry.date | date: 'y-MM-dd'}}" (ngModelChange)="selectedEndDate=$event" name="endDate">
+    </div>
+    <div class="form-group">
+        <label> Usage Type: </label>
+        <select size="1" class="form-control" [(ngModel)]="selectedUsageTypeId" name="usageType">
+            <option *ngFor="let usageType of usageTypes" [ngValue]="usageType.id"> {{usageType.description}} </option>
+        </select>
+    </div>
+    <div class="form-group">  
+        <label>Comment: </label>
+        <textarea type="text" rows="2" placeholder="Any Reason..." name="comment" [(ngModel)]="comment" class="form-control"></textarea>
+    </div>
+    <br />
+    <button type="submit" class="btn btn-primary" [disabled]="!editForm.form.valid"> Save </button>
+</form>

@@ -1,0 +1,66 @@
+
+<div class="row">
+    <div class="col-sm-9">
+        <h5 *ngIf="team"> {{team.name}} <small> <i> {{ getTeamManagers() }} </i> </small></h5>
+    </div>
+    <div class="col-sm-3 pull-right text-right"> <h4> <ft-month-picker (monthChanged)="monthChanged($event)"></ft-month-picker> </h4>
+     </div>
+</div>
+
+
+<div class="table-responsive">
+    <table class="table table-bordered table-condensed calendar" *ngIf="calendarEntries">
+        <thead>
+            <th> {{ selectedMonth | date: 'yyyy MMMM' }} </th>
+            <th *ngFor="let usage of calendarEntries[0].deskUsages" class="text-center calendar-date-col" [class.calendar-today]="isToday(usage.date)">
+                {{ usage.date | date: 'EEE dd' }}
+            </th>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="text-nowrap"><b> Desk Usages [Max: {{team.desks}}] </b> </td>
+                <td *ngFor="let usage of calendarEntries[0].deskUsages" class="text-center" ft-show-desk-usage [currentDeskUsage]="getDeskUsageCount(usage.date)"
+                    [teamDeskTotal]="team.desks"> </td>
+            </tr>
+            <tr *ngFor="let entry of calendarEntries">
+                <td class="text-nowrap"> {{ entry.person.name }} </td>
+
+                <td *ngFor="let usage of entry.deskUsages" class="calendar-usage-cell" [style.background-color]="getUsageColorCode(usage.usageTypeId)" (click)="editUsageType(editDeskUsage, entry.person, usage)">
+                    <i *ngIf="usage.comment" tooltip="{{usage.comment}}" class="fa fa-caret-up fa-rotate-45 comment-icon"> </i>
+                </td>
+            </tr>
+            <tbody>
+    </table>
+</div>
+
+<div class="row">
+    <div class="col-sm-12">
+        <table>
+            <tr>
+                <ng-container *ngFor="let legend of calendarLegends">
+                    <td [style.background-color]="legend.colorCode" class="legend-icon">  </td>
+                    <td class="legend-text"> {{ legend.description }} </td>
+                </ng-container>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<ng-template #editDeskUsage let-c="close" let-d="dismiss">
+    <div class="modal-header">
+        <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+        <h4 class="modal-title">Edit Desk Usage</h4>
+    </div>
+    <div class="modal-body">
+        <ft-calendar-update [person]="editPerson" [deskUsageEntry]="editDeskUsageEntry" (onUpdated)="calendarUpdated($event)"> </ft-calendar-update>
+    </div>
+</ng-template>
+
+
+<!--<button value="Modal" type="button" onclick="PF('dlg2').show();"></button>
+
+<p:dialog header="Modal Dialog" widgetVar="dlg2" modal="true" height="100">
+    <h:outputText value="This is a Modal Dialog." />
+</p:dialog>  -->

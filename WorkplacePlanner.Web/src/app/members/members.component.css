@@ -1,0 +1,16 @@
+.import-buttons {
+  min-width: 90px;
+}
+
+.import-textbox {
+  height:34px !important;
+  width:100%;
+}
+
+.top-gap {
+  margin-top: 2px !important;
+}
+
+.hidden {
+  display:none;
+}

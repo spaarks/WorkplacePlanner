@@ -1,0 +1,35 @@
+<ng-container *ngIf="teams">
+    <div class="table-responsive"> 
+        <table *ngIf="teams.length > 0" class="table table-striped table-condensed">
+            <tr>
+                <th><span class="toggle-icon"></span>Name</th>
+                <th class="text-center">Desks</th>
+                <th class="text-center"> Email Alert </th>
+                <th> Managers </th>
+                <th> </th>        
+            </tr>
+            <ng-container *ngFor="let team of teams">
+                <tr *ngIf="isExpanded(team.data.parentTeamId)">
+                    <td ft-indent-tree-table [level]="team.level"> 
+                        <span class="toggle-icon">
+                            <i *ngIf="team.hasChildren" [ngClass]="team.expanded ? 'fa fa-caret-down' : 'fa fa-caret-right'" class="clickable" (click)="team.expanded = !team.expanded" ></i>
+                        </span> 
+                        {{team.data.name}}
+                    </td> 
+                    <td class="text-center"> {{team.data.desks}} </td> 
+                    <td class="text-center"> {{team.data.emailNotification ? 'Yes' : 'No'}} </td> 
+                    <td> 
+                    {{ constructManagerList(team.data) }} 
+                    </td>  
+                    <td >
+                        <div class="pull-right">
+                        <button type="button" class="btn btn-primary" [routerLink]="['/teams/edit', team.data.id ]"> Edit </button>
+                        <button type="button" class="btn btn-primary"> Archive </button>
+                        </div>
+                    </td>     
+                </tr>
+            </ng-container>
+        </table>
+    </div>
+    <ft-no-data-template *ngIf="teams.length == 0"> </ft-no-data-template>
+</ng-container>
