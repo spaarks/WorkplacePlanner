@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
@@ -26,6 +27,7 @@ import { AppRoutingModule } from './app-routing.module';
 
 @NgModule({
   imports: [
+    BrowserAnimationsModule,
     BrowserModule,
     AppRoutingModule,
     BsDropdownModule.forRoot(),

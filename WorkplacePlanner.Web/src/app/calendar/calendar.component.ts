@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { NgbModal, ModalDismissReasons, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 
 import { CalendarService } from './services/calendar.service';
 import { CalendarEntry } from './models/calendar-entry';
@@ -9,12 +8,13 @@ import { Team } from '../teams/models/team';
 import { Person } from '../teams/models/person';
 import { CommonDataService } from '../core/services/common-data.service';
 import { CalendarLegend } from '../core/models/calendar-legend';
+import { UsageType } from '../core/models/usage-type';
 
 @Component({
     moduleId: module.id,
     selector: 'ft-calendar',
     templateUrl: 'calendar.component.html',
-    styleUrls: ['calendar.component.css']    
+    styleUrls: ['calendar.component.css']
 })
 
 export class CalendarComponent implements OnInit {
@@ -24,21 +24,24 @@ export class CalendarComponent implements OnInit {
 
     editPerson: Person = null;
     editDeskUsageEntry: DeskUsageEntry = null;
-    updateModal: NgbModalRef;
 
     calendarLegends: CalendarLegend[];
 
     today: Date = new Date();
 
+    usageTypes: UsageType[];
 
-    constructor(private calenderService: CalendarService, private teamService: TeamService, private modalService: NgbModal, private commonDataService : CommonDataService) { }
+    constructor(private calenderService: CalendarService, private teamService: TeamService, private commonDataService: CommonDataService) { }
 
     ngOnInit(): void {
         this.teamService.getTeam(1) //TODO   
             .then(team => this.team = team);
 
         this.commonDataService.getCalendarLegends()
-            .then(legends => this.calendarLegends = legends)    
+            .then(legends => this.calendarLegends = legends);
+
+        this.calenderService.getSelectableUsageTypes()
+            .then((data) => this.usageTypes = data);
 
         this.loadCalendar();
     }
@@ -61,21 +64,34 @@ export class CalendarComponent implements OnInit {
         return '[Managers: ' + (managers != '' ? managers : 'None') + ']';
     }
 
+    isUpdateCalendar: boolean = false;
+    editingEndDate: Date;
+
     editUsageType(content, person: Person, deskusageEntry: DeskUsageEntry) {
 
-        if(deskusageEntry.usageTypeCode == "nbd")
+        if (deskusageEntry.usageTypeCode == "nbd")
             return;
 
         this.editPerson = person;
-        this.editDeskUsageEntry = deskusageEntry;
+        this.editDeskUsageEntry = Object.assign({}, deskusageEntry);
+        this.editingEndDate = deskusageEntry.date;
+        this.isUpdateCalendar = true;
+    }
 
-        this.updateModal = this.modalService.open(content, { size: 'sm' });
+    updateCalendar() {
+        console.log('Calendar Updated');
+        //this.calendarService.updateCalender(this.deskUsageEntry.date, this.selectedEndDate, this.selectedUsageTypeId, null, this.person.id);
+        this.isUpdateCalendar = false;
 
-        // .result.then((result) => {
-        //     console.log('modal closed');
-        // }, (reason) => {
-        //     console.log('cross clicked');
-        // });
+        var obj = {
+            personId: this.editPerson.id,
+            startDate: this.editDeskUsageEntry.date, 
+            endDate: this.editingEndDate, 
+            usageTypeId: this.editDeskUsageEntry.usageTypeId, 
+            comment: this.editDeskUsageEntry.comment
+        };
+
+        this.updateCalenderForDemo(obj);
     }
 
     monthChanged(date: Date) {
@@ -85,7 +101,6 @@ export class CalendarComponent implements OnInit {
 
     private calendarUpdated(data: any): void {
         this.updateCalenderForDemo(data);
-        this.updateModal.close();
     }
 
     private updateCalenderForDemo(data: any) {
@@ -106,12 +121,18 @@ export class CalendarComponent implements OnInit {
         }
     }
 
-    isToday(date: Date) : boolean {
-        var isToday = this.today.setHours(0,0,0,0) == (new Date(date)).setHours(0,0,0,0);
-        return isToday;       
+    isToday(date: Date): boolean {
+        var isToday = this.today.setHours(0, 0, 0, 0) == (new Date(date)).setHours(0, 0, 0, 0);
+        return isToday;
     }
 
-    getUsageColorCode(usageTypeId: number) : string {
+    getUsageColorCode(usageTypeId: number): string {
         return this.commonDataService.getUsageType(usageTypeId).colourCode;
+    }
+
+    display: boolean = false;
+
+    showDialog() {
+        this.display = true;
     }
 }

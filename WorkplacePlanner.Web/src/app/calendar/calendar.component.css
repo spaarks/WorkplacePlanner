@@ -12,6 +12,11 @@
     padding: 0;
 }
 
+.calendar-date-col-header{
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
 .comment-icon {
     margin-top: -6px;
     margin-right: -2px;

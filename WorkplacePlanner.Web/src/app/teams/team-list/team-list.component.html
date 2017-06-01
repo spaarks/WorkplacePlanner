@@ -1,6 +1,6 @@
 <ng-container *ngIf="teams">
     <div class="table-responsive"> 
-        <table *ngIf="teams.length > 0" class="table table-striped table-condensed">
+        <table *ngIf="teams.length > 0" class="table table-striped table-sm">
             <tr>
                 <th><span class="toggle-icon"></span>Name</th>
                 <th class="text-center">Desks</th>
@@ -23,8 +23,8 @@
                     </td>  
                     <td >
                         <div class="pull-right">
-                        <button type="button" class="btn btn-primary" [routerLink]="['/teams/edit', team.data.id ]"> Edit </button>
-                        <button type="button" class="btn btn-primary"> Archive </button>
+                        <button type="button" class="btn btn-primary btn-sm" [routerLink]="['/teams/edit', team.data.id ]"> Edit </button>
+                        <button type="button" class="btn btn-primary btn-sm"> Archive </button>
                         </div>
                     </td>     
                 </tr>

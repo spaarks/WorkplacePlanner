@@ -4,8 +4,8 @@ import { FormsModule }   from '@angular/forms';
 //import { BrowserModule } from '@angular/platform-browser';
 import { HttpModule } from '@angular/http';
 
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { DatepickerModule, TooltipModule } from  'ngx-bootstrap/ng2-bootstrap' // 'ng2-bootstrap/ng2-bootstrap';
+import { DatepickerModule, TooltipModule } from  'ngx-bootstrap/ng2-bootstrap'; // 'ng2-bootstrap/ng2-bootstrap';
+import { DialogModule } from 'primeng/components/dialog/dialog';
 
 //In-memory data service for initial phase of development and mockup
 import { InMemoryWebApiModule } from 'angular-in-memory-web-api';
@@ -22,10 +22,10 @@ import { YearPickerComponent } from './year-picker/year-picker.component';
         //BrowserModule,
         CommonModule,
         DatepickerModule,
+        DialogModule,       
         FormsModule,
         HttpModule,
         InMemoryWebApiModule.forRoot(InMemoryDataService),
-        NgbModule.forRoot(),
         TooltipModule.forRoot(),
         DatepickerModule.forRoot()
     ],    
@@ -42,8 +42,8 @@ import { YearPickerComponent } from './year-picker/year-picker.component';
         //BrowserModule,
         CommonModule,
         DatepickerModule,
+        DialogModule,
         FormsModule,
-        NgbModule,
         HttpModule,
         MonthPickerComponent,
         PageHeaderComponent,
