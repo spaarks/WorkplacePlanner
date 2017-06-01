@@ -2,7 +2,6 @@ import { NgModule, Optional, SkipSelf } from '@angular/core';
 
 import { SharedModule } from '../shared/shared.module';
 import { throwIfAlreadyLoaded } from './module-import-guard';
-import { CommonDataService } from './services/common-data.service';
 
 @NgModule({
     imports: [
@@ -12,7 +11,7 @@ import { CommonDataService } from './services/common-data.service';
 
     ],
     providers: [
-        CommonDataService
+        
     ]
 })
 

@@ -38,14 +38,12 @@
 
 <div class="row">
     <div class="col-sm-12">
-        <table>
-            <tr>
-                <ng-container *ngFor="let legend of calendarLegends">
-                    <td [style.background-color]="legend.colorCode" class="legend-icon"> </td>
-                    <td class="legend-text"> {{ legend.description }} </td>
-                </ng-container>
-            </tr>
-        </table>
+        <ng-container *ngFor="let legend of calendarLegends">
+            <div class="col">           
+                <div [style.background-color]="legend.colorCode" class="legend-icon"></div>
+                <div class="legend-text">{{ legend.description }} </div>
+            </div>          
+        </ng-container>
     </div>
 </div>
 

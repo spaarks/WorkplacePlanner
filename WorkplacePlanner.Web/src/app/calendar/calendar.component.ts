@@ -6,9 +6,8 @@ import { DeskUsageEntry } from './models/desk-usage-entry';
 import { TeamService } from '../teams/services/team.service';
 import { Team } from '../teams/models/team';
 import { Person } from '../teams/models/person';
-import { CommonDataService } from '../core/services/common-data.service';
-import { CalendarLegend } from '../core/models/calendar-legend';
-import { UsageType } from '../core/models/usage-type';
+import { CalendarLegend } from './models/calendar-legend';
+import { UsageType } from './models/usage-type';
 
 @Component({
     moduleId: module.id,
@@ -31,23 +30,23 @@ export class CalendarComponent implements OnInit {
 
     usageTypes: UsageType[];
 
-    constructor(private calenderService: CalendarService, private teamService: TeamService, private commonDataService: CommonDataService) { }
+    constructor(private calendarService: CalendarService, private teamService: TeamService) { }
 
     ngOnInit(): void {
         this.teamService.getTeam(1) //TODO   
             .then(team => this.team = team);
 
-        this.commonDataService.getCalendarLegends()
+        this.calendarService.getCalendarLegends()
             .then(legends => this.calendarLegends = legends);
 
-        this.calenderService.getSelectableUsageTypes()
+        this.calendarService.getUsageTypes()
             .then((data) => this.usageTypes = data);
 
         this.loadCalendar();
     }
 
     loadCalendar() {
-        this.calenderService.getCalenderEntries(this.selectedMonth.getFullYear(), this.selectedMonth.getMonth())
+        this.calendarService.getCalenderEntries(this.selectedMonth.getFullYear(), this.selectedMonth.getMonth())
             .then(entries => this.calendarEntries = entries);
     }
 
@@ -113,7 +112,7 @@ export class CalendarComponent implements OnInit {
             if (usageEntry) {
                 if (usageEntry.usageTypeCode != "nbd") {
                     usageEntry.usageTypeId = data.usageTypeId;
-                    usageEntry.usageTypeCode = this.commonDataService.getUsageType(data.usageTypeId).code.toLowerCase();
+                    usageEntry.usageTypeCode = this.usageTypes.filter(u => u.id == data.usageTypeId)[0].code;
                     usageEntry.comment = data.comment;
                 }
             }
@@ -127,7 +126,7 @@ export class CalendarComponent implements OnInit {
     }
 
     getUsageColorCode(usageTypeId: number): string {
-        return this.commonDataService.getUsageType(usageTypeId).colourCode;
+        return this.usageTypes.filter(u => u.id == usageTypeId)[0].colourCode;
     }
 
     display: boolean = false;

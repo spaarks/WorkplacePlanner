@@ -4,7 +4,8 @@ import 'rxjs/add/operator/toPromise';
 import { DataService } from '../../shared/services/data.service';
 import { CalendarEntry } from '../models/calendar-entry';
 import { DeskUsageEntry } from '../models/desk-usage-entry';
-import { UsageType } from '../../core/models/usage-type';
+import { UsageType } from '../models/usage-type';
+import { CalendarLegend } from '../models/calendar-legend';
 
 @Injectable()
 export class CalendarService {
@@ -20,6 +21,12 @@ export class CalendarService {
 
     updateCalender(fromDate: Date, endDate: Date, usageTypeId : number, personTeamRoleId: number, personId: number) {
         console.log('updated called');
+    }
+
+    getCalendarLegends(): Promise<CalendarLegend[]> {
+        return this.dataService.get('calendarLegends', '')
+            .toPromise()
+            .then(response => response.json().data as CalendarLegend[]);
     }
 
     getUsageTypes() : Promise<UsageType[]> {
