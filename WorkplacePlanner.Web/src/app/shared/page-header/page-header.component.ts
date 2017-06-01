@@ -7,6 +7,7 @@ import { Component, Input, EventEmitter, Output } from '@angular/core'
 })
 
 export class PageHeaderComponent {
+    @Input() title: string;
     @Input() subTitle: string;
     @Input() buttonName: string;
     @Output() buttonClicked: EventEmitter<void>;
