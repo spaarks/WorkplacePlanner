@@ -20,7 +20,7 @@ export class TeamEditorComponent implements OnInit {
         
     }
 
-    private addTeam(): void {
+    public addTeam(): void {
         let link = ['/teams/new'];
         this.router.navigate(link);
     }

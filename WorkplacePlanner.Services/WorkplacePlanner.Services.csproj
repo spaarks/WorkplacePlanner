@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\WorkplacePlanner.Data\WorkplacePlanner.Data.csproj" />
+    <ProjectReference Include="..\WorkPlacePlanner.Domain\WorkPlacePlanner.Domain.csproj" />
+  </ItemGroup>
+
+</Project>
