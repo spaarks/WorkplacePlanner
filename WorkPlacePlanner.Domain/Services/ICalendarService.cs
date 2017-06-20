@@ -8,9 +8,9 @@ namespace WorkPlacePlanner.Domain.Services
     public interface ICalendarService
     {
         List<CalendarRawDto> GetCalendar(int teamId, DateTime month);
-
-        List<UsageTypeDto> GetUsageTypes();
-
+       
         void UpdateCalendar(CalendarUpdateDto data);
+
+        CalendarMetaDataDto GetCalendarMetaData(int teamId, DateTime date);
     }
 }

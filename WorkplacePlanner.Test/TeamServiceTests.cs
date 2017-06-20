@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using WorkplacePlanner.Data;
 using WorkplacePlanner.Data.Entities;
 using WorkplacePlanner.Services;
@@ -53,7 +54,7 @@ namespace WorkplacePlanner.Test
             {
                 var options = Helper.GetContextOptions();
 
-                CreateTestTeams(options);
+                SetupTestData(options);
 
                 using (var context = new DataContext(options))
                 {
@@ -87,7 +88,7 @@ namespace WorkplacePlanner.Test
             {
                 var options = Helper.GetContextOptions();
 
-                CreateTestTeams(options);
+                SetupTestData(options);
 
                 using (var context = new DataContext(options))
                 {
@@ -107,7 +108,7 @@ namespace WorkplacePlanner.Test
             {
                 var options = Helper.GetContextOptions();
 
-                CreateTestTeams(options);
+                SetupTestData(options);
 
                 using (var context = new DataContext(options))
                 {
@@ -139,7 +140,7 @@ namespace WorkplacePlanner.Test
             {
                 var options = Helper.GetContextOptions();
 
-                CreateTestTeams(options);
+                SetupTestData(options);
 
                 using (var context = new DataContext(options))
                 {
@@ -158,7 +159,7 @@ namespace WorkplacePlanner.Test
             {
                 var options = Helper.GetContextOptions();
 
-                CreateTestTeams(options);
+                SetupTestData(options);
 
                 using (var context = new DataContext(options))
                 {
@@ -191,7 +192,7 @@ namespace WorkplacePlanner.Test
             {
                 var options = Helper.GetContextOptions();
 
-                CreateTestTeams(options);
+                SetupTestData(options);
 
                 using (var context = new DataContext(options))
                 {
@@ -219,6 +220,63 @@ namespace WorkplacePlanner.Test
             }
         }
 
+        public class GetDefaultUsageType
+        {
+            [Theory]
+            [InlineData(2, "2017-3-1", 2)]
+            [InlineData(3, "2017-3-1", 2)]
+            [InlineData(3, "2017-4-1", 3)]
+            [InlineData(3, "2017-6-30", 3)]
+            [InlineData(3, "2017-8-30", 1)]
+            [InlineData(3, "2020-8-30", 1)]
+            public void WhenDefaultValuesExists_ReturnUsageType(int teamId, DateTime date, int expectedUsageTypeId)
+            {
+                var options = Helper.GetContextOptions();
+
+                SetupTestData(options);
+
+                using (var context = new DataContext(options))
+                {
+                    var service = CreateTeamService(context);
+                    Assert.Equal(expectedUsageTypeId, service.GetDefaultUsageType(teamId, date));
+                }
+            }
+
+            [Theory]
+            [InlineData(1, "2017-3-1", 1)]
+            [InlineData(3, "2017-1-15", 1)]
+            [InlineData(4, "2017-6-15", 1)]
+            public void WhenTeamDefaultNotExists_ReturnsGlobalDefaultUsageType(int teamId, DateTime date, int expectedUsageTypeId)
+            {
+                var options = Helper.GetContextOptions();
+
+                SetupTestData(options);
+
+                using (var context = new DataContext(options))
+                {
+                    var service = CreateTeamService(context);
+                    Assert.Equal(expectedUsageTypeId, service.GetDefaultUsageType(teamId, date));
+                }
+            }
+
+            [Theory]
+            [InlineData(1, "2016-1-1")]
+            [InlineData(2, "2016-4-1")]
+            [InlineData(3, "2016-6-15")]
+            public void WhenDefaultUsageTypeNotExists_ThrowsNullReferenceException(int teamId, DateTime date)
+            {
+                var options = Helper.GetContextOptions();
+
+                SetupTestData(options);
+
+                using (var context = new DataContext(options))
+                {
+                    var service = CreateTeamService(context);
+                    Assert.Throws<NullReferenceException>(() => service.GetDefaultUsageType(teamId, date));
+                }
+            }
+        }
+
         public class Update
         {
             [Theory]
@@ -230,7 +288,7 @@ namespace WorkplacePlanner.Test
             {
                 var options = Helper.GetContextOptions();
 
-                CreateTestTeams(options);
+                SetupTestData(options);
 
                 using (var context = new DataContext(options))
                 {
@@ -261,7 +319,7 @@ namespace WorkplacePlanner.Test
             {
                 var options = Helper.GetContextOptions();
 
-                CreateTestTeams(options);
+                SetupTestData(options);
 
                 using (var context = new DataContext(options))
                 {
@@ -284,31 +342,96 @@ namespace WorkplacePlanner.Test
 
         #region Setup Test Data
 
-        private static void CreateTestTeams(DbContextOptions<DataContext> options)
+        private static TeamService CreateTeamService(DataContext context)
+        {
+            var teamService = new TeamService(context);
+            return teamService;
+        }
+
+        private static void SetupTestData(DbContextOptions<DataContext> options)
         {
             using (var context = new DataContext(options))
             {
                 context.Database.EnsureDeleted();
 
-                context.Teams.Add(CreateTeam("IPG", 4, true, true, null));
-                context.Teams.Add(CreateTeam("TexaPro", 8, true, false, null));
-                context.Teams.Add(CreateTeam("CIC", 2, false, true, null));
-                context.Teams.Add(CreateTeam("Bonafied", 9, true, true, null));
-                context.Teams.Add(CreateTeam("RedEngine", 3, true, true, 4));
+                context.Teams.AddRange(GetTeams());
+                context.TeamDefaultUsageTypes.AddRange(GetTeamDefaultUsageType());
+                context.GlobalDefaultUsageTypes.AddRange(GetGlobalDefaultUsageType());
 
                 context.SaveChanges();
-            }
+            }            
         }
 
-        private static Team CreateTeam(string name, int deskCount, bool active, bool emailNotificationEnabled, int? parentTeamId)
+        private static List<Team> GetTeams()
+        {
+            var listTeams = new List<Team>
+            {
+                CreateTeam(1, "IPG", 4, true, true, null),
+                CreateTeam(2, "TexaPro", 8, true, false, null),
+                CreateTeam(3, "CIC", 2, false, true, null),
+                CreateTeam(4, "Bonafied", 9, true, true, null),
+                CreateTeam(5, "RedEngine", 3, true, true, 4)
+            };
+
+            return listTeams;
+        }
+
+        private static List<TeamDefaultUsageType> GetTeamDefaultUsageType()
+        {
+            var listTeamDefaultUsageTypes = new List<TeamDefaultUsageType>
+            {
+                CreateTeamDefaultUsageType(1, 2, 2, new DateTime(2017, 1, 1), null),
+                CreateTeamDefaultUsageType(2, 3, 2, new DateTime(2017, 2, 1), new DateTime(2017, 3, 31)),
+                CreateTeamDefaultUsageType(3, 3, 3, new DateTime(2017, 4, 1), new DateTime(2017, 6, 30)),
+                CreateTeamDefaultUsageType(5, 3, 1, new DateTime(2017, 7, 1), null)
+            };
+
+            return listTeamDefaultUsageTypes;
+        }
+
+        private static List<GlobalDefaultUsageType> GetGlobalDefaultUsageType()
+        {
+            var listGlobalDefaultUsageTypes = new List<GlobalDefaultUsageType>
+            {
+                CreateGlobalDefaultUsageType(1, 1, new DateTime(2017, 1, 1), null)
+            };
+
+            return listGlobalDefaultUsageTypes;
+        }
+
+        private static Team CreateTeam(int id, string name, int deskCount, bool active, bool emailNotificationEnabled, int? parentTeamId)
         {
             return new Team
             {
+               // Id = id,
                 Name = name,
                 Active = active,
                 DeskCount = deskCount,
                 EmailNotificationEnabled = emailNotificationEnabled,
                 ParentTeamId = parentTeamId
+            };
+        }
+
+        private static TeamDefaultUsageType CreateTeamDefaultUsageType(int id, int teamId, int usageTypeId, DateTime startDate, DateTime? endDate)
+        {
+            return new TeamDefaultUsageType
+            {
+                Id = id,
+                TeamId = teamId,
+                UsageTypeId = usageTypeId,
+                StartDate = startDate,
+                EndDate = endDate
+            };
+        }
+
+        private static GlobalDefaultUsageType CreateGlobalDefaultUsageType(int id, int usageTypeId, DateTime startDate, DateTime? endDate)
+        {
+            return new GlobalDefaultUsageType
+            {
+                Id = id,
+                UsageTypeId = usageTypeId,
+                StartDate = startDate,
+                EndDate = endDate
             };
         }
 

@@ -72,6 +72,25 @@ namespace WorkplacePlanner.Services
             return teamList;
         }
 
+        public int GetDefaultUsageType(int teamId, DateTime month)
+        {
+            var teamDefault = _dataContext.TeamDefaultUsageTypes
+                                .Where(d => d.TeamId == teamId
+                                        && d.StartDate <= month
+                                        && (d.EndDate == null || d.EndDate >= month))
+                                .FirstOrDefault();
+
+            if (teamDefault != null)
+                return teamDefault.UsageTypeId;
+
+            var globalDefault = _dataContext.GlobalDefaultUsageTypes
+                               .Where(d => d.StartDate <= month
+                                       && (d.EndDate == null || d.EndDate >= month))
+                               .FirstOrDefault();
+
+            return globalDefault.UsageTypeId;
+        }
+
         public void Update(TeamDto data)
         {
             var team = _dataContext.Teams.Find(data.Id);

@@ -14,11 +14,10 @@ namespace WorkplacePlanner.Test
 {
     public class CalendarServiceTests
     {
-
         public class GetCalendar
         {
             [Theory]
-            [InlineData(1, "2016-1-1", 0, 0)]
+            [InlineData(1, "2017-1-1", 0, 0)]
             [InlineData(1, "2017-2-1", 1, 28)]
             [InlineData(1, "2017-4-1", 2, 30)]
             [InlineData(1, "2017-5-1", 5, 31)]
@@ -39,12 +38,12 @@ namespace WorkplacePlanner.Test
             public void WhenValidDataExists_ReturnsCorrectRowAndEntryCounts(int teamId, DateTime month, int calendarRowCount, int rowEntryCount)
             {
                 var options = Helper.GetContextOptions();
-                
+
                 SetupCalendarTestData(options);
 
                 using (var context = new DataContext(options))
                 {
-                    var service = new CalendarService(context);
+                    var service = CreateCalendarService(context);                   
 
                     var calendarRows = service.GetCalendar(teamId, month);
 
@@ -65,7 +64,7 @@ namespace WorkplacePlanner.Test
             [InlineData(1, "2017-5-1", "glen@yopmail.com", 22, 1, 0, 8, 0)]
             [InlineData(1, "2017-6-1", "glen@yopmail.com", 20, 1, 0, 8, 1)]
             [InlineData(1, "2017-7-1", "glen@yopmail.com", 20, 0, 1, 9, 1)]
-            public void WhenValidDataExists_ReturnsCorrectUsageTypeCounts(int teamId, DateTime month, string personEmail, int ioCount, int wfhCount, int ooCount, int nbdCount, int mhCount)
+            public void WhenTeamDefaultUsageTypeNotExists_ReturnsCorrectUsageTypeCounts(int teamId, DateTime month, string personEmail, int ioCount, int wfhCount, int ooCount, int nbdCount, int mhCount)
             {
                 var options = Helper.GetContextOptions();
 
@@ -73,7 +72,32 @@ namespace WorkplacePlanner.Test
 
                 using (var context = new DataContext(options))
                 {
-                    var service = new CalendarService(context);
+                    var service = CreateCalendarService(context);
+
+                    var calendarRows = service.GetCalendar(teamId, month);
+                    var calendarRow = calendarRows.Where(r => r.Person.Email == personEmail).FirstOrDefault();
+
+                    Assert.Equal(ioCount, calendarRow.CalendarEntries.Where(e => e.UsageTypeId == 1).Count());
+                    Assert.Equal(wfhCount, calendarRow.CalendarEntries.Where(e => e.UsageTypeId == 2).Count());
+                    Assert.Equal(ooCount, calendarRow.CalendarEntries.Where(e => e.UsageTypeId == 3).Count());
+                    Assert.Equal(nbdCount, calendarRow.CalendarEntries.Where(e => e.UsageTypeId == 4).Count());
+                    Assert.Equal(mhCount, calendarRow.CalendarEntries.Where(e => e.UsageTypeId == 5).Count());
+                }
+            }
+
+
+            [Theory]
+            [InlineData(3, "2017-6-1", "yash@yopmail.com", 0, 21, 0, 8, 1)]
+            [InlineData(3, "2017-8-1", "adam@yopmail.com", 23, 0, 0, 8, 0)]
+            public void WhenTeamDefaultUsageTypeExists_ReturnsCorrectUsageTypeCounts(int teamId, DateTime month, string personEmail, int ioCount, int wfhCount, int ooCount, int nbdCount, int mhCount)
+            {
+                var options = Helper.GetContextOptions();
+
+                SetupCalendarTestData(options);
+
+                using (var context = new DataContext(options))
+                {
+                    var service = CreateCalendarService(context);
 
                     var calendarRows = service.GetCalendar(teamId, month);
                     var calendarRow = calendarRows.Where(r => r.Person.Email == personEmail).FirstOrDefault();
@@ -104,7 +128,7 @@ namespace WorkplacePlanner.Test
 
                 using (var context = new DataContext(options))
                 {
-                    var service = new CalendarService(context);
+                    var service = CreateCalendarService(context);
 
                     var calendarRows = service.GetCalendar(teamId, month);
                     var calendarRow = calendarRows.Where(r => r.Person.Email == personEmail).FirstOrDefault();
@@ -116,7 +140,68 @@ namespace WorkplacePlanner.Test
             }
         }
 
+        public class GetCalendarMetaData
+        {
+            [Theory]
+            [InlineData(1, "2017-1-5", 1, "Sauron@yopmail.com")]
+            [InlineData(1, "2017-4-1", 2, "Prodo@yopmail.com")]
+            [InlineData(2, "2017-5-1", 1, "Sauron@yopmail.com")]
+            [InlineData(3, "2017-8-1", 2, "Bilbo@yopmail.com")]
+            [InlineData(3, "2017-7-1", 2, "Piping@yopmail.com")]
+            public void WhenManagersExists_ReturnCorrectData(int teamId, DateTime date, int managerCount, string managerEmail)
+            {
+                var options = Helper.GetContextOptions();
+
+                SetupCalendarTestData(options);
+
+                using (var context = new DataContext(options))
+                {
+                    var service = CreateCalendarService(context);
+
+                    var metaData = service.GetCalendarMetaData(teamId, date);
+
+                    var managers = metaData.TeamManagers;
+
+                    Assert.True(managers.Where(m => m.Email == managerEmail).Any());
+                    Assert.Equal(managerCount, managers.Count);
+                    Assert.Equal(5, metaData.UsageTypes.Count);
+                }
+            }
+
+            [Theory]
+            [InlineData(1, "2016-12-31")]
+            [InlineData(2, "2017-4-1")]
+            [InlineData(3, "2017-1-1")]
+            [InlineData(4, "2017-6-1")]
+            public void WhenManagersNotExists_ReturnEmptyList(int teamId, DateTime date)
+            {
+                var options = Helper.GetContextOptions();
+
+                SetupCalendarTestData(options);
+
+                using (var context = new DataContext(options))
+                {
+                    var service = CreateCalendarService(context);
+
+                    var metaData = service.GetCalendarMetaData(teamId, date);
+
+                    var managers = metaData.TeamManagers;
+                   
+                    Assert.Equal(0, managers.Count);
+                    Assert.Equal(5, metaData.UsageTypes.Count);
+                }
+            }
+        }
+
         #region Setup Test Data
+
+        public static CalendarService CreateCalendarService(DataContext context)
+        {
+            var settingsService = new SettingsService(context);
+            var teamService = new TeamService(context);
+            var calendarService = new CalendarService(context, settingsService, teamService);
+            return calendarService;
+        }
 
         public static void SetupCalendarTestData(DbContextOptions<DataContext> options)
         {
@@ -131,8 +216,21 @@ namespace WorkplacePlanner.Test
                 context.Settings.AddRange(GetSettings());
                 context.UsageTypes.AddRange(GetUsageTypes());
                 context.Holidays.AddRange(GetHolidays());
+                context.TeamDefaultUsageTypes.AddRange(GetTeamDefaultUsageType());
+                context.GlobalDefaultUsageTypes.AddRange(GetGlobalDefaultUsageType());
+                context.TeamManagers.AddRange(GetTeamManagers());
 
                 context.SaveChanges();
+            }
+        }
+
+        public static void SetupUsageTypeTestData(DbContextOptions<DataContext> options)
+        {
+            using (var context = new DataContext(options))
+            {
+                context.Database.EnsureDeleted();
+
+                //context.UsageTypes.AddRange()
             }
         }
 
@@ -160,7 +258,11 @@ namespace WorkplacePlanner.Test
                 CreatePerson(7, "Andrew", "Flintop", false, "andrew@yopmail.com"),
                 CreatePerson(8, "Ben", "Stoke", true, "ben@yopmail.com"),
                 CreatePerson(9, "Lionel", "Messi", true, "lionel@yopmail.com"),
-                CreatePerson(10, "Leo", "Tolstoy", true, "leo@yopmail.com")
+                CreatePerson(10, "Leo", "Tolstoy", true, "leo@yopmail.com"),
+                CreatePerson(100, "Sauron", "Manager", true, "Sauron@yopmail.com"),
+                CreatePerson(101, "Prodo", "Manager", true, "Prodo@yopmail.com"),
+                CreatePerson(102, "Bilbo", "Manager", true, "Bilbo@yopmail.com"),
+                CreatePerson(103, "Piping", "Manager", true, "Piping@yopmail.com")
             };
 
             return list;
@@ -240,6 +342,41 @@ namespace WorkplacePlanner.Test
             return listHolidays;
         }
 
+        private static List<TeamDefaultUsageType> GetTeamDefaultUsageType()
+        {
+            var listTeamDefaultUsageTypes = new List<TeamDefaultUsageType>
+            {
+                CreateTeamDefaultUsageType(1, 2, 2, new DateTime(2017, 1, 1), null),
+                CreateTeamDefaultUsageType(2, 3, 2, new DateTime(2017, 1, 1), new DateTime(2017, 6, 30)),
+                CreateTeamDefaultUsageType(3, 3, 1, new DateTime(2017, 7, 1), null)
+            };
+
+            return listTeamDefaultUsageTypes;
+        }
+
+        private static List<GlobalDefaultUsageType> GetGlobalDefaultUsageType()
+        {
+            var listGlobalDefaultUsageTypes = new List<GlobalDefaultUsageType>
+            {
+                CreateGlobalDefaultUsageType(1, 1, new DateTime(2017, 1, 1), null)               
+            };
+
+            return listGlobalDefaultUsageTypes;
+        }
+
+        private static TeamManager[] GetTeamManagers()
+        {
+            var listManagers = new TeamManager[] {
+                CreateTeamManager(1, 1, 100, new DateTime(2017, 1, 1), new DateTime(2017, 4, 30)),
+                CreateTeamManager(2, 1, 101, new DateTime(2017, 3, 1), null),
+                CreateTeamManager(3, 2, 100, new DateTime(2017, 5, 1), null),
+                CreateTeamManager(4, 3, 102, new DateTime(2017, 2, 1), null),
+                CreateTeamManager(5, 3, 103, new DateTime(2017, 3, 1), null)
+            };
+
+            return listManagers;
+        }
+
         private static Team CreateTeam(int id, string name, int deskCount, bool active, bool emailNotificationEnabled, int? parentTeamId)
         {
             return new Team
@@ -274,6 +411,18 @@ namespace WorkplacePlanner.Test
                 PersonId = personId,
                 StartDate = startDate,
                 EndDate = endDate,
+            };
+        }
+
+        private static TeamManager CreateTeamManager(int id, int teamId, int personId, DateTime startDate, DateTime? endDate)
+        {
+            return new TeamManager
+            {
+                Id = id,
+                TeamId = teamId,
+                PersonId = personId,
+                StartDate = startDate,
+                EndDate = endDate
             };
         }
 
@@ -319,6 +468,29 @@ namespace WorkplacePlanner.Test
                 Id = id,
                 Date = date,
                 Reason = reason
+            };
+        }
+
+        private static TeamDefaultUsageType CreateTeamDefaultUsageType(int id, int teamId, int usageTypeId, DateTime startDate, DateTime? endDate)
+        {
+            return new TeamDefaultUsageType
+            {
+                Id = id,
+                TeamId = teamId,
+                UsageTypeId = usageTypeId,
+                StartDate = startDate,
+                EndDate = endDate
+            };
+        }
+
+        private static GlobalDefaultUsageType CreateGlobalDefaultUsageType(int id, int usageTypeId, DateTime startDate, DateTime? endDate)
+        {
+            return new GlobalDefaultUsageType
+            {
+                Id = id,
+                UsageTypeId = usageTypeId,
+                StartDate = startDate,
+                EndDate = endDate
             };
         }
     }

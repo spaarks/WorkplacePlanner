@@ -12,10 +12,14 @@ namespace WorkplacePlanner.Services
     public class CalendarService : ICalendarService
     {
         DataContext _dataContext;
+        ISettingsService _settingsService;
+        ITeamService _teamService;
 
-        public CalendarService(DataContext context)
+        public CalendarService(DataContext context, ISettingsService settingsService, ITeamService teamService)
         {
             _dataContext = context;
+            _settingsService = settingsService;
+            _teamService = teamService;
         }
 
         public List<CalendarRawDto> GetCalendar(int teamId, DateTime month)
@@ -38,7 +42,6 @@ namespace WorkplacePlanner.Services
                                 LastName = m.Person.LastName,
                                 Email = m.Person.Email
                             },
-
                             CalendarEntries = m.CalendarEntries
                             .Where(e => e.Date >= startDate && e.Date <= endDate)
                             .Select(e => new CalendarEntryDto
@@ -52,17 +55,38 @@ namespace WorkplacePlanner.Services
                             }).ToList(),
 
                             MembershipId = m.Id,
-
                             HasPermissionToEdit = true //TODO
-
                         }).ToList();
 
-            FillDefaultCalendarEntries(ref list, month);
+            FillDefaultCalendarEntries(ref list, teamId, month);
 
             return list;
         }
 
-        public List<UsageTypeDto> GetUsageTypes()
+        public CalendarMetaDataDto GetCalendarMetaData(int teamId, DateTime date)
+        {
+            var usageTypes = GetUsageTypes();
+            var managers = _dataContext.TeamManagers
+                                .Where(m => m.TeamId == teamId
+                                        && m.StartDate <= date
+                                        && (m.EndDate == null || m.EndDate >= date))
+                                 .Select(m => new PersonDto {
+                                     Email = m.Person.Email,
+                                     FirstName = m.Person.FirstName,
+                                     LastName = m.Person.LastName,
+                                     Id = m.PersonId
+                                 }).ToList();
+
+            var metaDataDto = new CalendarMetaDataDto
+            {
+                UsageTypes = usageTypes,
+                TeamManagers = managers
+            };
+
+            return metaDataDto;
+        }
+
+        private List<UsageTypeDto> GetUsageTypes()
         {
             var listUsageTypes = _dataContext.UsageTypes.Select(u => new UsageTypeDto
             {
@@ -83,9 +107,9 @@ namespace WorkplacePlanner.Services
 
         #region Private Methods
 
-        private void FillDefaultCalendarEntries(ref List<CalendarRawDto> calendarRows, DateTime month)
+        private void FillDefaultCalendarEntries(ref List<CalendarRawDto> calendarRows, int teamId, DateTime month)
         {
-            List<CalendarEntryDto> monthDetaultEntries = GetDetaultEntriesForMonth(month);
+            List<CalendarEntryDto> monthDetaultEntries = GetDetaultEntriesForMonth(teamId, month);
             foreach (var row in calendarRows)
             {
                 monthDetaultEntries.ForEach(e => e.TeamMembershipId = row.MembershipId);
@@ -99,13 +123,13 @@ namespace WorkplacePlanner.Services
             return mergedList;
         }
 
-        private List<CalendarEntryDto> GetDetaultEntriesForMonth(DateTime month)
+        private List<CalendarEntryDto> GetDetaultEntriesForMonth(int teamId, DateTime month)
         {
             int[] workingWeekDays = GetWorkingWeekDays();
             var holidays = GetHolidays(month);
             var usageTypes = GetUsageTypes();
 
-            int usageTypeInOffice = usageTypes.Where(u => u.Abbreviation == "IO").Select(u => u.Id).FirstOrDefault();
+            int usageTypeInOffice = _teamService.GetDefaultUsageType(teamId, month);
             int usageTypeNonWorkingDay = usageTypes.Where(u => u.Abbreviation == "NBD").Select(u => u.Id).FirstOrDefault();
             int usageTypeHoliday = usageTypes.Where(u => u.Abbreviation == "MH").Select(u => u.Id).FirstOrDefault();
 
@@ -131,12 +155,9 @@ namespace WorkplacePlanner.Services
 
         private int[] GetWorkingWeekDays()
         {
-            var listWeekDays = _dataContext.Settings
-                .Where(s => s.Name == "WorkingWeekDays")
-                .Select(s => s.Value).FirstOrDefault().Split(',')
-                .Select(val => int.Parse(val)).ToArray();
-
-            return listWeekDays;
+            string listWeekDays = _settingsService.Get("WorkingWeekDays");
+            int[] arryWeekDays = listWeekDays.Split(',').Select(val => int.Parse(val)).ToArray();
+            return arryWeekDays;
         }
 
         private List<Holiday> GetHolidays(DateTime month)
