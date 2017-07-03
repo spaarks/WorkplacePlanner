@@ -19,20 +19,40 @@ namespace WorkplacePlanner.WebApi.Controllers
         {
             _calendarService = calendarService;
         }
-
         
-        [HttpGet(Name = "Get")]
+        [HttpGet("{teamId}/{month}")]
         public IEnumerable<CalendarRawDto> Get(int teamId, DateTime month)
         {
             var calendarRows = _calendarService.GetCalendar(teamId, month);
             return calendarRows;
         }
-
-        [HttpGet(Name = "GetMetaData")]
-        public CalendarMetaDataDto GetMetaData(int teamId, DateTime month)
+        
+        [HttpGet("Entries/{teamMembershipId}/{month}")]
+        public IEnumerable<CalendarEntryDto> GetCalendarEntries(int teamMembershipId, DateTime month)
         {
-            var metaData = _calendarService.GetCalendarMetaData(teamId, month);
-            return metaData;
+            var calendarRows = _calendarService.GetCalendarEntries(teamMembershipId, month);
+            return calendarRows;
+        }
+
+        [HttpPut]
+        public void Put([FromBody]CalendarUpdateDto data)
+        {
+            _calendarService.UpdateCalendar(data);
+        }
+
+        //[HttpGet]
+        //[Route("MetaData")]
+        //public CalendarMetaDataDto GetMetaData([FromQuery]int teamId, [FromQuery]DateTime month, [FromQuery]string x)
+        //{
+        //    var metaData = _calendarService.GetCalendarMetaData(teamId, month);
+        //    return metaData;
+        //}
+
+        [HttpGet("UsageTypes")]
+        public IEnumerable<UsageTypeDto> GetUsagesType()
+        {
+            var usageTypes = _calendarService.GetUsageTypes();
+            return usageTypes;
         }
 
         /*

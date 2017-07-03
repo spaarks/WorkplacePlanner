@@ -2,101 +2,59 @@ import { Injectable } from '@angular/core';
 import 'rxjs/add/operator/toPromise';
 
 import { DataService } from '../../shared/services/data.service';
+import { CalendarRow } from '../models/calendar-row';
 import { CalendarEntry } from '../models/calendar-entry';
-import { DeskUsageEntry } from '../models/desk-usage-entry';
 import { UsageType } from '../models/usage-type';
 import { CalendarLegend } from '../models/calendar-legend';
+import { QueryStringParam } from '../../shared/models/query-string-param';
+import { CalendarUpdateDto } from '../models/calendar-update-dto';
 
 @Injectable()
 export class CalendarService {
 
-    constructor(private dataService: DataService) {}
+    constructor(private dataService: DataService) { }
 
-    getCalenderEntries(year: number, month: number): Promise<CalendarEntry[]> {
-        return this.dataService.get('calendarEntries', '')
+    getCalendar(teamId: number, month: Date): Promise<CalendarRow[]> {
+        return this.dataService.get("calendar", '', [teamId.toString(), this.formatDate(month)])
             .toPromise()
-            .then(response => this.fillEmptyEntries(year, month, response.json().data as CalendarEntry[]));
-            // .catch(this.handleError);
+            .then(response => response.json() as CalendarRow[]);
     }
 
-    updateCalender(fromDate: Date, endDate: Date, usageTypeId : number, personTeamRoleId: number, personId: number) {
-        console.log('updated called');
-    }
-
-    getCalendarLegends(): Promise<CalendarLegend[]> {
-        return this.dataService.get('calendarLegends', '')
+    getCalenderEntries(teamMembershipId: number, month: Date): Promise<CalendarEntry[]> {
+        return this.dataService.get('calendar', 'entries', [teamMembershipId.toString(), this.formatDate(month)])
             .toPromise()
-            .then(response => response.json().data as CalendarLegend[]);
+            .then(response => response.json() as CalendarEntry[]);
     }
 
-    getUsageTypes() : Promise<UsageType[]> {
-        return this.dataService.get('usageTypes', '')
+    getUsageTypes(): Promise<UsageType[]> {
+        return this.dataService.get('calendar', 'usageTypes')
             .toPromise()
-            .then(response => response.json().data as UsageType[])
+            .then(response => response.json() as UsageType[])
     }
 
-    getSelectableUsageTypes() : Promise<UsageType[]> {
-        return this.getUsageTypes()
-                    .then((u) => u.filter(u => u.selectable));
+    getUsageStates(): CalendarLegend[] {
+        let usageStates: CalendarLegend[] = [
+            { colorCode: 'red', description: 'Desk Over Use', code: '' },
+            { colorCode: 'yellow', description: 'Desk Fully Use', code: '' },
+            { colorCode: 'green', description: 'Desk Under Use', code: '' }
+        ];
+        return usageStates;
     }
 
-    private fillEmptyEntries(year: number, month: number, calendarEntries: CalendarEntry[]) : CalendarEntry[] {
-        var usageEntries : DeskUsageEntry[] = [];
-        var days = this.getDaysInMonth(year, month);
-
-        calendarEntries.forEach(entry => {
-            usageEntries = [];
-            days.forEach(day => { 
-                   
-                   var usage = entry.deskUsages.find(u => (new Date(u.date)).setHours(0,0,0,0) == day.setHours(0,0,0,0)) 
-                   
-                   if(usage) {
-                        usageEntries.push(usage);
-                   } 
-                   else
-                   {
-                        usageEntries.push(this.createDefaultDeskUsageEntry(day));
-                   }
-
-            });
-            
-            entry.deskUsages = usageEntries;
-        });
-
-        return calendarEntries;
+    updateCalendar(data: CalendarUpdateDto): Promise<any> {
+        return this.dataService.update('calendar', '', data)
+            .toPromise();
     }
 
-    private createDefaultDeskUsageEntry(day: Date)
-    {
-        var defaultUsage = new DeskUsageEntry();
-        defaultUsage.id = -1;
-        defaultUsage.date = day;
-        defaultUsage.comment = '';
+    private formatDate(date): string {
+        var d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear();
 
-        if(day.getDay() == 6 || day.getDay() == 0 )
-        {
-            defaultUsage.usageTypeId = 4; //Default usage type TODO
-            defaultUsage.usageTypeCode = "nbd";
-        }
-       else
-       {
-            defaultUsage.usageTypeId = 1; //Default usage type TODO
-            defaultUsage.usageTypeCode = "io";
-       }
-        
-        return defaultUsage;
-    }
+        if (month.length < 2) month = '0' + month;
+        if (day.length < 2) day = '0' + day;
 
-    private getDaysInMonth(year: number, month: number) : Date[] {
-        var date = new Date(year, month, 1);
-        var days: Date[] = [];
-       
-        while (date.getMonth() === month){
-            
-            days.push(new Date(date));
-            date.setDate(date.getDate() + 1);
-        }
-        
-        return days;
+        return [year, month, day].join('-');
     }
 }

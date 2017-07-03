@@ -1,5 +1,5 @@
 export class CalendarLegend {
-    colourCode: string;
+    colorCode: string;
     description: string;
     code: string;
 }

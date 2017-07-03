@@ -2,12 +2,13 @@ import { Component, OnInit } from '@angular/core';
 
 import { CalendarService } from './services/calendar.service';
 import { CalendarEntry } from './models/calendar-entry';
-import { DeskUsageEntry } from './models/desk-usage-entry';
+import { CalendarRow } from './models/calendar-row';
 import { TeamService } from '../teams/services/team.service';
 import { Team } from '../teams/models/team';
 import { Person } from '../teams/models/person';
 import { CalendarLegend } from './models/calendar-legend';
 import { UsageType } from './models/usage-type';
+import { CalendarUpdateDto } from './models/calendar-update-dto';
 
 @Component({
     moduleId: module.id,
@@ -17,44 +18,61 @@ import { UsageType } from './models/usage-type';
 })
 
 export class CalendarComponent implements OnInit {
-    calendarEntries: CalendarEntry[];
+    calendarRows: CalendarRow[];
     selectedMonth: Date = new Date();
     team: Team;
 
     editPerson: Person = null;
-    editDeskUsageEntry: DeskUsageEntry = null;
+    editCalendarEntry: CalendarEntry = null;
 
+    usageTypes: UsageType[];
+    editableUsageTypes: UsageType[];
     calendarLegends: CalendarLegend[];
 
     today: Date = new Date();
+    usageTypeId_InOffice: number;
 
-    usageTypes: UsageType[];
+    isUpdateCalendar: boolean = false;
+    editingEndDate: Date;
 
     constructor(private calendarService: CalendarService, private teamService: TeamService) { }
 
     ngOnInit(): void {
-        this.teamService.getTeam(1) //TODO   
-            .then(team => this.team = team);
-
-        this.calendarService.getCalendarLegends()
-            .then(legends => this.calendarLegends = legends);
-
         this.calendarService.getUsageTypes()
-            .then((data) => this.usageTypes = data);
+            .then((data) => (this.usageTypes = data))
+            .then(() => {
+                this.editableUsageTypes = this.usageTypes.filter(u => u.selectable == true)
 
-        this.loadCalendar();
+                this.usageTypeId_InOffice = this.usageTypes.find(u => u.abbreviation.toUpperCase() == "IO").id;
+
+                this.calendarLegends = [];
+
+                this.usageTypes.forEach(u => {
+                    var legend = new CalendarLegend();
+                    legend.code = u.abbreviation;
+                    legend.colorCode = u.colorCode;
+                    legend.description = u.description;
+
+                    this.calendarLegends.push(legend);
+                });
+
+                this.calendarLegends = this.calendarLegends.concat(this.calendarService.getUsageStates());
+            });
+
+        this.teamService.get(1) //TODO   
+            .then(team => this.team = team)
+            .then(() => { this.loadCalendar(); });
     }
 
     loadCalendar() {
-        this.calendarService.getCalenderEntries(this.selectedMonth.getFullYear(), this.selectedMonth.getMonth())
-            .then(entries => this.calendarEntries = entries);
+        this.calendarService.getCalendar(this.team.id, this.selectedMonth)
+            .then(entries => (this.calendarRows = entries));
     }
 
     getDeskUsageCount(day: Date): number {
-        var count = this.calendarEntries
-            .filter(el => el.deskUsages
-                .findIndex(u => (new Date(u.date)).setHours(0, 0, 0, 0) == (new Date(day)).setHours(0, 0, 0, 0) && u.usageTypeCode == "io") >= 0).length;
-        //console.log(count);        
+        var count = this.calendarRows
+            .filter(el => el.calendarEntries
+                .findIndex(u => (new Date(u.date)).setHours(0, 0, 0, 0) == (new Date(day)).setHours(0, 0, 0, 0) && u.usageTypeId == this.usageTypeId_InOffice) >= 0).length;
         return count;
     }
 
@@ -63,61 +81,37 @@ export class CalendarComponent implements OnInit {
         return '[Managers: ' + (managers != '' ? managers : 'None') + ']';
     }
 
-    isUpdateCalendar: boolean = false;
-    editingEndDate: Date;
-
-    editUsageType(content, person: Person, deskusageEntry: DeskUsageEntry) {
-
-        if (deskusageEntry.usageTypeCode == "nbd")
-            return;
-
-        this.editPerson = person;
-        this.editDeskUsageEntry = Object.assign({}, deskusageEntry);
-        this.editingEndDate = deskusageEntry.date;
-        this.isUpdateCalendar = true;
+    editCalendar(content, row: CalendarRow, editingEntry: CalendarEntry) {
+        if (row.hasPermissionToEdit && editingEntry.editable) {
+            this.editPerson = row.person;
+            this.editCalendarEntry = Object.assign({}, editingEntry);
+            this.editingEndDate = editingEntry.date;
+            this.isUpdateCalendar = true;
+        }
     }
 
     updateCalendar() {
-        console.log('Calendar Updated');
-        //this.calendarService.updateCalender(this.deskUsageEntry.date, this.selectedEndDate, this.selectedUsageTypeId, null, this.person.id);
+        let data = new CalendarUpdateDto();
+        data.teamMembershipId = this.editCalendarEntry.teamMembershipId;
+        data.usageTypeId = this.editCalendarEntry.usageTypeId;
+        data.comment = this.editCalendarEntry.comment;
+        data.startDate = this.editCalendarEntry.date;
+        data.endDate = this.editingEndDate;
+
+        this.calendarService.updateCalendar(data)
+            .then(() => {
+                var row = this.calendarRows.find(r => r.membershipId == data.teamMembershipId);
+                this.calendarService.getCalenderEntries(data.teamMembershipId, this.selectedMonth)
+                    .then(data => row.calendarEntries = data);
+
+            });
+
         this.isUpdateCalendar = false;
-
-        var obj = {
-            personId: this.editPerson.id,
-            startDate: this.editDeskUsageEntry.date, 
-            endDate: this.editingEndDate, 
-            usageTypeId: this.editDeskUsageEntry.usageTypeId, 
-            comment: this.editDeskUsageEntry.comment
-        };
-
-        this.updateCalenderForDemo(obj);
     }
 
     monthChanged(date: Date) {
         this.selectedMonth = date;
         this.loadCalendar();
-    }
-
-    private calendarUpdated(data: any): void {
-        this.updateCalenderForDemo(data);
-    }
-
-    private updateCalenderForDemo(data: any) {
-        var entry = this.calendarEntries.find(e => e.person.id == data.personId);
-        var sDate = new Date(data.startDate);
-        var eDate = new Date(data.endDate);
-
-        while (sDate <= eDate) {
-            var usageEntry = entry.deskUsages.find(u => (new Date(u.date)).setHours(0, 0, 0, 0) == sDate.setHours(0, 0, 0, 0));
-            if (usageEntry) {
-                if (usageEntry.usageTypeCode != "nbd") {
-                    usageEntry.usageTypeId = data.usageTypeId;
-                    usageEntry.usageTypeCode = this.usageTypes.filter(u => u.id == data.usageTypeId)[0].code;
-                    usageEntry.comment = data.comment;
-                }
-            }
-            sDate.setDate(sDate.getDate() + 1);
-        }
     }
 
     isToday(date: Date): boolean {
@@ -126,12 +120,6 @@ export class CalendarComponent implements OnInit {
     }
 
     getUsageColorCode(usageTypeId: number): string {
-        return this.usageTypes.filter(u => u.id == usageTypeId)[0].colourCode;
-    }
-
-    display: boolean = false;
-
-    showDialog() {
-        this.display = true;
+        return this.usageTypes.find(u => u.id == usageTypeId).colorCode;
     }
 }

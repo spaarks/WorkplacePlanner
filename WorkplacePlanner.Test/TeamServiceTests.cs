@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using WorkplacePlanner.Data;
 using WorkplacePlanner.Data.Entities;
 using WorkplacePlanner.Services;
@@ -40,16 +41,16 @@ namespace WorkplacePlanner.Test
 
                     var newTeam = service.Get(id);
 
-                    ValidateTeam(newTeam, id, name, deskCount, active, emailNotificationEnabled, parentTeamId);
+                    ValidateTeam(newTeam, id, name, deskCount, active, emailNotificationEnabled, parentTeamId, 0);
                 }
             }
 
             [Theory]
-            [InlineData(6, "Team 10", 5, true, true, null)]
-            [InlineData(6, "Team 20", 10, false, true, null)]
-            [InlineData(6, "Team 30", 25, false, true, null)]
-            [InlineData(6, "Team 40", 500, true, false, null)]
-            [InlineData(6, "Team 50", 250, false, false, 3)]
+            [InlineData(9, "Team 10", 5, true, true, null)]
+            [InlineData(9, "Team 20", 10, false, true, null)]
+            [InlineData(9, "Team 30", 25, false, true, null)]
+            [InlineData(9, "Team 40", 500, true, false, null)]
+            [InlineData(9, "Team 50", 250, false, false, 3)]
             public void WhenTeamsNotExists_WhenPassingCorrectData_CreateSuccessfully(int id, string name, int deskCount, bool active, bool emailNotificationEnabled, int? parentTeamId)
             {
                 var options = Helper.GetContextOptions();
@@ -73,7 +74,7 @@ namespace WorkplacePlanner.Test
 
                     var newTeam = service.Get(id);
 
-                    ValidateTeam(newTeam, id, name, deskCount, active, emailNotificationEnabled, parentTeamId);
+                    ValidateTeam(newTeam, id, name, deskCount, active, emailNotificationEnabled, parentTeamId, 0);
                 }
             }
         }
@@ -133,10 +134,10 @@ namespace WorkplacePlanner.Test
         public class Get
         {
             [Theory]
-            [InlineData(1, "IPG", 4, true, true, null )]
-            [InlineData(2, "TexaPro", 8, true, false, null)]
-            [InlineData(5, "RedEngine", 3, true, true, 4)]
-            public void WhenValidIdGiven_ReturnsTeam(int id, string name, int deskCount, bool active, bool emailNotificationEnabled, int? parentTeamId)
+            [InlineData(1, "IPG", 4, true, true, null, 2)]
+            [InlineData(2, "TexaPro", 8, true, false, 1, 0)]
+            [InlineData(5, "RedEngine", 3, true, true, 4, 1)]
+            public void WhenValidIdGiven_ReturnsTeam(int id, string name, int deskCount, bool active, bool emailNotificationEnabled, int? parentTeamId, int managerCount)
             {
                 var options = Helper.GetContextOptions();
 
@@ -147,7 +148,7 @@ namespace WorkplacePlanner.Test
                     var service = new TeamService(context);
                     var team = service.Get(id);
 
-                    ValidateTeam(team, id, name, deskCount, active, emailNotificationEnabled, parentTeamId);
+                    ValidateTeam(team, id, name, deskCount, active, emailNotificationEnabled, parentTeamId, managerCount);
                 }
             }
 
@@ -183,6 +184,44 @@ namespace WorkplacePlanner.Test
                     Assert.Null(team);
                 }
             }
+
+            [Fact]
+            public void WhenManagersExists_ReturnTeamWithCorrectManagers()
+            {
+                var options = Helper.GetContextOptions();
+
+                SetupTestData(options);
+
+                using (var context = new DataContext(options))
+                {
+                    var service = new TeamService(context);
+                    var team = service.Get(1);
+
+                    ValidateTeam(team, 1, "IPG", 4, true, true, null, 2);
+
+                    var managerEmails = team.Managers.Select(m => m.Email).ToArray();
+                    Assert.True(managerEmails.Contains("glen@yopmail.com"));
+                    Assert.True(managerEmails.Contains("adam@yopmail.com"));
+                    Assert.False(managerEmails.Contains("alex@yopmail.com"));
+                }
+            }
+
+            [Fact]
+            public void WhenManagersNotExists_ReturnTeamWithoutManagers()
+            {
+                var options = Helper.GetContextOptions();
+
+                SetupTestData(options);
+
+                using (var context = new DataContext(options))
+                {
+                    var service = new TeamService(context);
+                    var team = service.Get(2);
+
+                    ValidateTeam(team, 2, "TexaPro", 8, true, false, 1, 0);
+                    Assert.Equal(0, team.Managers.Length);
+                }
+            }
         }
 
         public class GetAll
@@ -200,7 +239,17 @@ namespace WorkplacePlanner.Test
                     var teams = service.GetAll();
 
                     Assert.NotNull(teams);
-                    Assert.Equal(5, teams.Count);
+                    Assert.Equal(8, teams.Count);
+
+                    //Check for managers in one team
+                    var team = teams.Where(t => t.Id == 1).FirstOrDefault();
+
+                    ValidateTeam(team, 1, "IPG", 4, true, true, null, 2);
+
+                    var managerEmails = team.Managers.Select(m => m.Email).ToArray();
+                    Assert.True(managerEmails.Contains("glen@yopmail.com"));
+                    Assert.True(managerEmails.Contains("adam@yopmail.com"));
+                    Assert.False(managerEmails.Contains("alex@yopmail.com"));
                 }
             }
 
@@ -217,9 +266,58 @@ namespace WorkplacePlanner.Test
                     Assert.NotNull(teams);
                     Assert.Equal(0, teams.Count);
                 }
-            }
+            }           
         }
 
+        public class GetSubTeams
+        {
+            [Theory]
+            [InlineData(1, 1)]
+            [InlineData(2, 0)]
+            [InlineData(4, 4)]
+            [InlineData(5, 2)]
+            [InlineData(7, 1)]
+            public void WhenPassingParentId_ReturnAllSubTeams(int parentId, int subTeamCount)
+            {
+                var options = Helper.GetContextOptions();
+
+                SetupTestData(options);
+
+                using (var context = new DataContext(options))
+                {
+                    var service = new TeamService(context);
+                    var teams = service.GetSubTeams(parentId);
+
+                    Assert.Equal(subTeamCount, teams.Count);
+                }
+            }
+
+
+            [Fact]
+            public void WhenPassingParentId_ReturnSubTeamsWithManagers()
+            {
+                var options = Helper.GetContextOptions();
+
+                SetupTestData(options);
+
+                using (var context = new DataContext(options))
+                {
+                    var service = new TeamService(context);
+                    var teams = service.GetSubTeams(4);
+
+                    Assert.Equal(4, teams.Count);
+
+                    var team = teams.Where(t => t.Id == 5).FirstOrDefault();
+
+                    ValidateTeam(team, 5, "RedEngine", 3, true, true, 4, 1);
+
+                    var managerEmails = team.Managers.Select(m => m.Email).ToArray();
+                    Assert.True(managerEmails.Contains("adam@yopmail.com"));
+                    Assert.False(managerEmails.Contains("alex@yopmail.com"));
+                }
+            }
+        }
+        
         public class GetDefaultUsageType
         {
             [Theory]
@@ -280,11 +378,11 @@ namespace WorkplacePlanner.Test
         public class Update
         {
             [Theory]
-            [InlineData(1, "Team 1", 5, true, true, null)]
-            [InlineData(2, "Team 5", 5, true, true, null)]
-            [InlineData(3, "Spaarks", 5, true, false, null)]
-            [InlineData(4, "IPG Mobile", 5, true, false, 1)]
-            public void WhenTeamExists_UpdateSuccessfully(int id, string name, int deskCount, bool active, bool emailNotificationEnabled, int? parentTeamId)
+            [InlineData(1, "Team 1", 5, true, true, null, 2)]
+            [InlineData(2, "Team 5", 5, true, true, null, 0)]
+            [InlineData(3, "Spaarks", 5, true, false, null, 0)]
+            [InlineData(4, "IPG Mobile", 5, true, false, 1, 1)]
+            public void WhenTeamExists_UpdateSuccessfully(int id, string name, int deskCount, bool active, bool emailNotificationEnabled, int? parentTeamId, int managerCount)
             {
                 var options = Helper.GetContextOptions();
 
@@ -308,7 +406,7 @@ namespace WorkplacePlanner.Test
 
                     var newTeam = service.Get(id);
 
-                    ValidateTeam(newTeam, id, name, deskCount, active, emailNotificationEnabled, parentTeamId);
+                    ValidateTeam(newTeam, id, name, deskCount, active, emailNotificationEnabled, parentTeamId, managerCount);
                 }
             }
 
@@ -355,6 +453,8 @@ namespace WorkplacePlanner.Test
                 context.Database.EnsureDeleted();
 
                 context.Teams.AddRange(GetTeams());
+                context.People.AddRange(GetPeople());
+                context.TeamManagers.AddRange(GetTeamManagers());
                 context.TeamDefaultUsageTypes.AddRange(GetTeamDefaultUsageType());
                 context.GlobalDefaultUsageTypes.AddRange(GetGlobalDefaultUsageType());
 
@@ -367,13 +467,44 @@ namespace WorkplacePlanner.Test
             var listTeams = new List<Team>
             {
                 CreateTeam(1, "IPG", 4, true, true, null),
-                CreateTeam(2, "TexaPro", 8, true, false, null),
+                CreateTeam(2, "TexaPro", 8, true, false, 1),
                 CreateTeam(3, "CIC", 2, false, true, null),
                 CreateTeam(4, "Bonafied", 9, true, true, null),
-                CreateTeam(5, "RedEngine", 3, true, true, 4)
+                CreateTeam(5, "RedEngine", 3, true, true, 4),
+                CreateTeam(6, "STC", 3, true, false, 4),
+                CreateTeam(7, "Drop Point", 3, true, false, 5),
+                CreateTeam(8, "Drop Point", 3, true, false, 7)
             };
 
             return listTeams;
+        }
+
+        private static List<Person> GetPeople()
+        {
+            var list = new List<Person> {
+                CreatePerson(1, "Alex", "Smith", true, "alex@yopmail.com"),
+                CreatePerson(2, "Glenn", "Maxwell", true, "glen@yopmail.com"),
+                CreatePerson(3, "Adam", "Gilchrist", true, "adam@yopmail.com"),
+                CreatePerson(4, "Steve", "Smith", true, "steve@yopmail.com"),
+                CreatePerson(5, "Mike", "Pence", true, "mike@yopmail.com")
+            };
+
+            return list;
+        }
+
+        private static TeamManager[] GetTeamManagers()
+        {
+            var listManagers = new TeamManager[] {
+                CreateTeamManager(1, 1, 1, new DateTime(2017, 1, 1), new DateTime(2017, 4, 30)),
+                CreateTeamManager(2, 1, 2, new DateTime(2017, 3, 1), null),
+                CreateTeamManager(3, 4, 1, new DateTime(2017, 5, 1), null),
+                CreateTeamManager(4, 5, 3, new DateTime(2017, 2, 1), null),
+                CreateTeamManager(5, 7, 4, new DateTime(2017, 3, 1), null),
+                CreateTeamManager(6, 8, 5, new DateTime(2017, 3, 1), null),
+                CreateTeamManager(7, 1, 3, new DateTime(2017, 3, 1), null)
+            };
+
+            return listManagers;
         }
 
         private static List<TeamDefaultUsageType> GetTeamDefaultUsageType()
@@ -397,6 +528,18 @@ namespace WorkplacePlanner.Test
             };
 
             return listGlobalDefaultUsageTypes;
+        }       
+
+        private static TeamManager CreateTeamManager(int id, int teamId, int personId, DateTime startDate, DateTime? endDate)
+        {
+            return new TeamManager
+            {
+                Id = id,
+                TeamId = teamId,
+                PersonId = personId,
+                StartDate = startDate,
+                EndDate = endDate
+            };
         }
 
         private static Team CreateTeam(int id, string name, int deskCount, bool active, bool emailNotificationEnabled, int? parentTeamId)
@@ -435,11 +578,23 @@ namespace WorkplacePlanner.Test
             };
         }
 
+        private static Person CreatePerson(int id, string firstName, string lastName, bool active, string email)
+        {
+            return new Person
+            {
+                Id = id,
+                FirstName = firstName,
+                LastName = lastName,
+                Active = active,
+                Email = email,
+            };
+        }
+
         #endregion
 
         #region Validating Data
 
-        private static void ValidateTeam(TeamDto team, int? id, string name, int deskCount, bool active, bool emailNotificationEnabled, int? parentTeamId)
+        private static void ValidateTeam(TeamDto team, int? id, string name, int deskCount, bool active, bool emailNotificationEnabled, int? parentTeamId, int managerCount)
         {
             Assert.NotNull(team);
 
@@ -451,6 +606,7 @@ namespace WorkplacePlanner.Test
             Assert.Equal(active, team.Active);
             Assert.Equal(emailNotificationEnabled, team.EmailNotificationEnabled);
             Assert.Equal(parentTeamId, team.ParentTeamId);
+            Assert.Equal(managerCount, team.Managers.Length);
         }
 
         #endregion

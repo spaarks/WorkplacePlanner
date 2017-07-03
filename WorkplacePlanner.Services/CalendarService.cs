@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using WorkplacePlanner.Data;
 using WorkplacePlanner.Data.Entities;
+using WorkplacePlanner.Utills.CustomExceptions;
 using WorkPlacePlanner.Domain.Dtos.Calendar;
 using WorkPlacePlanner.Domain.Dtos.Person;
 using WorkPlacePlanner.Domain.Services;
@@ -26,7 +27,9 @@ namespace WorkplacePlanner.Services
         {
             DateTime startDate = new DateTime(month.Year, month.Month, 1);
             DateTime endDate = startDate.AddMonths(1).AddSeconds(-1);
-            
+
+            string[] nonEditableUsageTypes = _settingsService.Get("UnEditableUsageTypes").Split(',');
+
             var list = _dataContext.TeamMemberships
                         .Where(m => m.TeamId == teamId
                             && m.StartDate <= endDate  
@@ -51,7 +54,7 @@ namespace WorkplacePlanner.Services
                                 Date = e.Date,
                                 Comment = e.Comments,
                                 UsageTypeId = e.UsageTypeId,
-                                Editable = true //TODO
+                                Editable = !nonEditableUsageTypes.Contains(e.UsageType.Abbreviation)
                             }).ToList(),
 
                             MembershipId = m.Id,
@@ -63,30 +66,61 @@ namespace WorkplacePlanner.Services
             return list;
         }
 
-        public CalendarMetaDataDto GetCalendarMetaData(int teamId, DateTime date)
+        public List<CalendarEntryDto> GetCalendarEntries(int teamMembershipId, DateTime month)
         {
-            var usageTypes = GetUsageTypes();
-            var managers = _dataContext.TeamManagers
-                                .Where(m => m.TeamId == teamId
-                                        && m.StartDate <= date
-                                        && (m.EndDate == null || m.EndDate >= date))
-                                 .Select(m => new PersonDto {
-                                     Email = m.Person.Email,
-                                     FirstName = m.Person.FirstName,
-                                     LastName = m.Person.LastName,
-                                     Id = m.PersonId
-                                 }).ToList();
+            DateTime startDate = new DateTime(month.Year, month.Month, 1);
+            DateTime endDate = startDate.AddMonths(1).AddSeconds(-1);
 
-            var metaDataDto = new CalendarMetaDataDto
-            {
-                UsageTypes = usageTypes,
-                TeamManagers = managers
-            };
+            string[] nonEditableUsageTypes = _settingsService.Get("UnEditableUsageTypes").Split(',');
 
-            return metaDataDto;
+            var teamId = _dataContext.TeamMemberships.Where(m => m.Id == teamMembershipId).FirstOrDefault().TeamId;
+
+            var list = _dataContext.TeamMemberships
+                            .Where(m => m.Id == teamMembershipId)
+                            .SelectMany(m => m.CalendarEntries)
+                            .Where(e => e.Date >= startDate && e.Date <= endDate)
+                            .Select(e => new CalendarEntryDto
+                            {
+                                Id = e.Id,
+                                TeamMembershipId = e.TeamMembershipId,
+                                Date = e.Date,
+                                Comment = e.Comments,
+                                UsageTypeId = e.UsageTypeId,
+                                Editable = !nonEditableUsageTypes.Contains(e.UsageType.Abbreviation)
+                            }).ToList();
+
+            FillDefaultCalendarEntries(ref list, teamId, month, teamMembershipId);
+
+            return list;
         }
 
-        private List<UsageTypeDto> GetUsageTypes()
+        public List<Holiday> GetHolidays(DateTime startDate, DateTime endDate)
+        {
+            var listHolidays = _dataContext.Holidays
+                                .Where(h => h.Date >= startDate && h.Date <= endDate)
+                                .ToList();
+
+            return listHolidays;
+        }
+
+        public List<Holiday> GetHolidaysOfMonth(DateTime month)
+        {
+            DateTime startDate = new DateTime(month.Year, month.Month, 1);
+            DateTime endDate = startDate.AddMonths(1).AddSeconds(-1);
+
+            var listHolidays = GetHolidays(startDate, endDate);
+
+            return listHolidays;
+        }
+        
+        public int[] GetWorkingWeekDays()
+        {
+            string listWeekDays = _settingsService.Get("WorkingWeekDays");
+            int[] arryWeekDays = listWeekDays.Split(',').Select(val => int.Parse(val)).ToArray();
+            return arryWeekDays;
+        }
+
+        public List<UsageTypeDto> GetUsageTypes()
         {
             var listUsageTypes = _dataContext.UsageTypes.Select(u => new UsageTypeDto
             {
@@ -97,24 +131,69 @@ namespace WorkplacePlanner.Services
                 ColorCode = u.ColorCode,
                 Selectable = u.Selectable
             }).ToList();
+
             return listUsageTypes;
         }
 
         public void UpdateCalendar(CalendarUpdateDto data)
         {
-            throw new NotImplementedException();
+            if (data.StartDate > data.EndDate)
+                throw new InvalidDateRangeException();
+
+            var weekDays = GetWorkingWeekDays();
+            var holidays = GetHolidays(data.StartDate, data.EndDate);
+
+            for (DateTime date = data.StartDate; date <= data.EndDate; date = date.AddDays(1))
+            {
+                if (weekDays.Contains((int)date.DayOfWeek) && !holidays.Any(h => h.Date == date))
+                {
+                    var calendarEntry = _dataContext.CalendarEntries
+                                .Where(e => e.TeamMembershipId == data.TeamMembershipId
+                                    && e.Date == date)
+                                .FirstOrDefault();
+
+                    if (calendarEntry == null)
+                    {
+                        calendarEntry = new CalendarEntry
+                        {
+                            TeamMembershipId = data.TeamMembershipId,
+                            UsageTypeId = data.UsageTypeId,
+                            Comments = data.Comment,
+                            Date = date
+                        };
+
+                        _dataContext.CalendarEntries.Add(calendarEntry);
+                    }
+                    else
+                    {
+                        calendarEntry.UsageTypeId = data.UsageTypeId;
+                        calendarEntry.Comments = data.Comment;
+
+                        _dataContext.CalendarEntries.Update(calendarEntry);
+                    }
+                }
+            }
+            _dataContext.SaveChanges();
         }
 
         #region Private Methods
 
         private void FillDefaultCalendarEntries(ref List<CalendarRawDto> calendarRows, int teamId, DateTime month)
         {
-            List<CalendarEntryDto> monthDetaultEntries = GetDetaultEntriesForMonth(teamId, month);
+            List<CalendarEntryDto> monthDetaultEntriesTemplate = GetDetaultEntriesForMonth(teamId, month);
             foreach (var row in calendarRows)
             {
+                List<CalendarEntryDto> monthDetaultEntries = monthDetaultEntriesTemplate.Select(e => e.Clone()).ToList();
                 monthDetaultEntries.ForEach(e => e.TeamMembershipId = row.MembershipId);
                 row.CalendarEntries = MergeCalendarEntries(monthDetaultEntries, row.CalendarEntries);
             }
+        }
+
+        private void FillDefaultCalendarEntries(ref List<CalendarEntryDto> calendarEntries, int teamId, DateTime month, int teamMembershipId)
+        {
+            List<CalendarEntryDto> monthDetaultEntries = GetDetaultEntriesForMonth(teamId, month);
+            monthDetaultEntries.ForEach(e => e.TeamMembershipId = teamMembershipId);
+            calendarEntries = MergeCalendarEntries(monthDetaultEntries, calendarEntries);
         }
 
         private List<CalendarEntryDto> MergeCalendarEntries(List<CalendarEntryDto> defaultEntries, List<CalendarEntryDto> existingEntries)
@@ -126,7 +205,7 @@ namespace WorkplacePlanner.Services
         private List<CalendarEntryDto> GetDetaultEntriesForMonth(int teamId, DateTime month)
         {
             int[] workingWeekDays = GetWorkingWeekDays();
-            var holidays = GetHolidays(month);
+            var holidays = GetHolidaysOfMonth(month);
             var usageTypes = GetUsageTypes();
 
             int usageTypeInOffice = _teamService.GetDefaultUsageType(teamId, month);
@@ -138,38 +217,19 @@ namespace WorkplacePlanner.Services
             DateTime startDate = new DateTime(month.Year, month.Month, 1);
             for (DateTime day = startDate; day.Month == startDate.Month; day = day.AddDays(1))
             {
-                var holiday = holidays.Where(h => h.Date == day).FirstOrDefault();
+                var isHoliday = holidays.Any(h => h.Date == day);
+                int usageTypeId = workingWeekDays.Contains((int)day.DayOfWeek) ? (isHoliday ? usageTypeHoliday : usageTypeInOffice) : usageTypeNonWorkingDay;
 
                 listDefaultEntries.Add(new CalendarEntryDto
                 {
                     Id = 0,
                     Date = day,
-                    Comment = holiday == null ? string.Empty : holiday.Reason,
-                    UsageTypeId = workingWeekDays.Contains((int)day.DayOfWeek) ? (holiday != null ? usageTypeHoliday : usageTypeInOffice): usageTypeNonWorkingDay,
-                    Editable = workingWeekDays.Contains((int)day.DayOfWeek)
+                    Comment = string.Empty,
+                    UsageTypeId = usageTypeId,
+                    Editable = (usageTypeId == usageTypeInOffice)
                 });
             }
-
             return listDefaultEntries;
-        }
-
-        private int[] GetWorkingWeekDays()
-        {
-            string listWeekDays = _settingsService.Get("WorkingWeekDays");
-            int[] arryWeekDays = listWeekDays.Split(',').Select(val => int.Parse(val)).ToArray();
-            return arryWeekDays;
-        }
-
-        private List<Holiday> GetHolidays(DateTime month)
-        {
-            DateTime startDate = new DateTime(month.Year, month.Month, 1);
-            DateTime endDate = startDate.AddMonths(1).AddSeconds(-1);
-
-            var listHolidays = _dataContext.Holidays
-                                .Where(h => h.Date >= startDate && h.Date <= endDate)
-                                .ToList();
-
-            return listHolidays;
         }
 
         #endregion

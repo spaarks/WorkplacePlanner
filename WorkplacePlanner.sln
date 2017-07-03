@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.6
+VisualStudioVersion = 15.0.26430.13
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "WorkplacePlanner.Web", "WorkplacePlanner.Web\", "{9B124D2F-49D8-48D5-AED9-C8C58FF01961}"
 	ProjectSection(WebsiteProperties) = preProject
@@ -28,11 +28,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkplacePlanner.Data", "Wo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkPlacePlanner.Domain", "WorkPlacePlanner.Domain\WorkPlacePlanner.Domain.csproj", "{042D13FD-B7AE-4C17-967A-C04257D24962}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkplacePlanner.WebApi", "WorkplacePlanner.WebApi\WorkplacePlanner.WebApi.csproj", "{BD37FD3D-6269-4342-9D83-E951824B51C2}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkplacePlanner.Test", "WorkplacePlanner.Test\WorkplacePlanner.Test.csproj", "{2FC2C43E-D91F-4AB0-A14A-1395EAE6F846}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkplacePlanner.Services", "WorkplacePlanner.Services\WorkplacePlanner.Services.csproj", "{437B0A89-CB95-46D6-B7B9-E87C7D307C46}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkplacePlanner.WebApi", "WorkplacePlanner.WebApi\WorkplacePlanner.WebApi.csproj", "{43B47641-D996-45A3-9B5D-8ADDB5104CD3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkplacePlanner.Utills", "WorkplacePlanner.Utills\WorkplacePlanner.Utills.csproj", "{ACAC6973-A04B-40CC-BCB6-AAB8DE716C03}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,10 +53,6 @@ Global
 		{042D13FD-B7AE-4C17-967A-C04257D24962}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{042D13FD-B7AE-4C17-967A-C04257D24962}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{042D13FD-B7AE-4C17-967A-C04257D24962}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BD37FD3D-6269-4342-9D83-E951824B51C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BD37FD3D-6269-4342-9D83-E951824B51C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BD37FD3D-6269-4342-9D83-E951824B51C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BD37FD3D-6269-4342-9D83-E951824B51C2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2FC2C43E-D91F-4AB0-A14A-1395EAE6F846}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2FC2C43E-D91F-4AB0-A14A-1395EAE6F846}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2FC2C43E-D91F-4AB0-A14A-1395EAE6F846}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -63,6 +61,14 @@ Global
 		{437B0A89-CB95-46D6-B7B9-E87C7D307C46}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{437B0A89-CB95-46D6-B7B9-E87C7D307C46}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{437B0A89-CB95-46D6-B7B9-E87C7D307C46}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43B47641-D996-45A3-9B5D-8ADDB5104CD3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43B47641-D996-45A3-9B5D-8ADDB5104CD3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43B47641-D996-45A3-9B5D-8ADDB5104CD3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43B47641-D996-45A3-9B5D-8ADDB5104CD3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ACAC6973-A04B-40CC-BCB6-AAB8DE716C03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACAC6973-A04B-40CC-BCB6-AAB8DE716C03}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACAC6973-A04B-40CC-BCB6-AAB8DE716C03}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACAC6973-A04B-40CC-BCB6-AAB8DE716C03}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

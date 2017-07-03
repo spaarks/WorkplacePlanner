@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using WorkplacePlanner.Data;
 using WorkplacePlanner.Data.Entities;
+using WorkplacePlanner.Utills.CustomExceptions;
+using WorkPlacePlanner.Domain.Dtos.Person;
 using WorkPlacePlanner.Domain.Dtos.Team;
 using WorkPlacePlanner.Domain.Services;
 
@@ -50,7 +52,17 @@ namespace WorkplacePlanner.Services
                         Active = t.Active,
                         DeskCount = t.DeskCount,
                         EmailNotificationEnabled = t.EmailNotificationEnabled,
-                        ParentTeamId = t.ParentTeamId
+                        ParentTeamId = t.ParentTeamId,
+                        Managers = t.Managers
+                                    .Where(m => m.StartDate <= DateTime.Now
+                                            && (m.EndDate == null || m.EndDate >= DateTime.Now))
+                                    .Select(m => new PersonDto
+                                    {
+                                        Id = m.Person.Id,
+                                        FirstName = m.Person.FirstName,
+                                        LastName = m.Person.LastName,
+                                        Email = m.Person.Email
+                                    }).ToArray()                                         
                     }).FirstOrDefault();
 
             return team;
@@ -66,27 +78,76 @@ namespace WorkplacePlanner.Services
                        Active = t.Active,
                        DeskCount = t.DeskCount,
                        EmailNotificationEnabled = t.EmailNotificationEnabled,
-                       ParentTeamId = t.ParentTeamId
+                       ParentTeamId = t.ParentTeamId,
+                       Managers = t.Managers
+                                    .Where(m => m.StartDate <= DateTime.Now
+                                            && (m.EndDate == null || m.EndDate >= DateTime.Now))
+                                    .Select(m => new PersonDto
+                                    {
+                                        Id = m.Person.Id,
+                                        FirstName = m.Person.FirstName,
+                                        LastName = m.Person.LastName,
+                                        Email = m.Person.Email
+                                    }).ToArray()
                    }).ToList();
 
             return teamList;
         }
 
-        public int GetDefaultUsageType(int teamId, DateTime month)
+        public ICollection<TeamDto> GetSubTeams(int parentId)
+        {
+            var teamList = _dataContext.Teams
+                 .Where(t => t.Id == parentId)
+                 .SelectMany(t => t.SubTeams)
+                 .Select(st => new TeamDto
+                 {
+                     Id = st.Id,
+                     Name = st.Name,
+                     Active = st.Active,
+                     DeskCount = st.DeskCount,
+                     EmailNotificationEnabled = st.EmailNotificationEnabled,
+                     ParentTeamId = st.ParentTeamId,
+                     Managers = st.Managers
+                                    .Where(m => m.StartDate <= DateTime.Now
+                                            && (m.EndDate == null || m.EndDate >= DateTime.Now))
+                                    .Select(m => new PersonDto
+                                    {
+                                        Id = m.Person.Id,
+                                        FirstName = m.Person.FirstName,
+                                        LastName = m.Person.LastName,
+                                        Email = m.Person.Email
+                                    }).ToArray()
+                 }).ToList();
+
+            List<TeamDto> subTeams = new List<TeamDto>();
+            foreach (var team in teamList)
+            {
+                subTeams.AddRange(GetSubTeams(team.Id));
+            }
+
+            teamList.AddRange(subTeams);
+
+            return teamList;
+        }       
+
+        public int GetDefaultUsageType(int teamId, DateTime date)
         {
             var teamDefault = _dataContext.TeamDefaultUsageTypes
                                 .Where(d => d.TeamId == teamId
-                                        && d.StartDate <= month
-                                        && (d.EndDate == null || d.EndDate >= month))
+                                        && d.StartDate <= date
+                                        && (d.EndDate == null || d.EndDate >= date))
                                 .FirstOrDefault();
 
             if (teamDefault != null)
                 return teamDefault.UsageTypeId;
 
             var globalDefault = _dataContext.GlobalDefaultUsageTypes
-                               .Where(d => d.StartDate <= month
-                                       && (d.EndDate == null || d.EndDate >= month))
+                               .Where(d => d.StartDate <= date
+                                       && (d.EndDate == null || d.EndDate >= date))
                                .FirstOrDefault();
+
+            if (globalDefault == null)
+                throw new TeamDefaultUsageTypeMissingException();
 
             return globalDefault.UsageTypeId;
         }

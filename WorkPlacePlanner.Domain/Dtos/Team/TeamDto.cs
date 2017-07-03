@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using WorkPlacePlanner.Domain.Dtos.Person;
 
 namespace WorkPlacePlanner.Domain.Dtos.Team
 {
@@ -17,5 +18,7 @@ namespace WorkPlacePlanner.Domain.Dtos.Team
         public bool Active { get; set; }
 
         public bool EmailNotificationEnabled { get; set; }
+
+        public PersonDto[] Managers { get; set; }
     }
 }

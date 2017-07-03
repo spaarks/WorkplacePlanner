@@ -25,7 +25,7 @@ import { YearPickerComponent } from './year-picker/year-picker.component';
         DialogModule,       
         FormsModule,
         HttpModule,
-        InMemoryWebApiModule.forRoot(InMemoryDataService),
+        //InMemoryWebApiModule.forRoot(InMemoryDataService),
         TooltipModule.forRoot(),
         DatepickerModule.forRoot()
     ],    

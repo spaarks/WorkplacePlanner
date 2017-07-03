@@ -18,12 +18,12 @@
                     <div class="form-group">
                         <label> Desks: </label>
                         <!--<p-spinner [(ngModel)]="team.desks" name="desks" #desks="ngModel" required> </p-spinner>-->
-                        <input type="number" class="form-control" [(ngModel)]="team.desks" name="desks" #desks="ngModel" required />
+                        <input type="number" class="form-control" [(ngModel)]="team.deskCount" name="desks" #desks="ngModel" required />
                         <div [hidden]="desks.valid" class="alert alert-danger"> Desks count is requred </div>
                     </div>
                     <div class="form-group">
                         <label> Email Notication: </label>
-                        <input type="checkbox" [(ngModel)]="team.emailNotification" name="emailNotification" />
+                        <input type="checkbox" [(ngModel)]="team.emailNotificationEnabled" name="emailNotification" />
                     </div>
                     <br />
                     <button type="submit" class="btn btn-primary" [disabled]="!editForm.form.valid"> Save </button>
@@ -40,7 +40,7 @@
                     <ft-no-data-template *ngIf="team.managers == null"> </ft-no-data-template>
                     <table class="table table-sm table-borderless">
                         <tr *ngFor="let manager of team.managers">
-                            <td> {{manager.name}} </td>
+                            <td> {{manager.firstName}} {{manager.lastName}} </td>
                             <td class="text-right"> <a class="btn fa fa-trash">  </a> </td>
                         </tr>
                     </table>

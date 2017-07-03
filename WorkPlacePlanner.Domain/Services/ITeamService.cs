@@ -17,6 +17,8 @@ namespace WorkPlacePlanner.Domain.Services
 
         int GetDefaultUsageType(int teamId, DateTime month);
 
+        ICollection<TeamDto> GetSubTeams(int parentId);
+
         void Update(TeamDto data);
     }
 }

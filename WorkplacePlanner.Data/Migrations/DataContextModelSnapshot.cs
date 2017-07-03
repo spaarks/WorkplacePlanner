@@ -182,6 +182,8 @@ namespace WorkplacePlanner.Data.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
+                    b.HasIndex("ParentTeamId");
+
                     b.ToTable("Teams");
                 });
 
@@ -332,6 +334,13 @@ namespace WorkplacePlanner.Data.Migrations
                         .WithMany()
                         .HasForeignKey("UsageTypeId")
                         .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("WorkplacePlanner.Data.Entities.Team", b =>
+                {
+                    b.HasOne("WorkplacePlanner.Data.Entities.Team", "ParentTeam")
+                        .WithMany("SubTeams")
+                        .HasForeignKey("ParentTeamId");
                 });
 
             modelBuilder.Entity("WorkplacePlanner.Data.Entities.TeamDefaultUsageType", b =>

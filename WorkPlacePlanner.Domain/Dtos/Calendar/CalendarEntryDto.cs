@@ -4,7 +4,12 @@ using System.Text;
 
 namespace WorkPlacePlanner.Domain.Dtos.Calendar
 {
-    public class CalendarEntryDto
+    public interface ICloneable<T>
+    {
+        T Clone();
+    }
+
+    public class CalendarEntryDto : ICloneable<CalendarEntryDto> 
     {
         public int Id { get; set; }
 
@@ -17,6 +22,19 @@ namespace WorkPlacePlanner.Domain.Dtos.Calendar
         public int UsageTypeId { get; set; }
 
         public bool Editable { get; set; }
+
+        public CalendarEntryDto Clone()
+        {
+            return new CalendarEntryDto
+            {
+                Id = this.Id,
+                TeamMembershipId = this.TeamMembershipId,
+                Date = this.Date,
+                Comment = this.Comment,
+                UsageTypeId = this.UsageTypeId,
+                Editable = this.Editable
+            };
+        }
 
         public override bool Equals(object obj)
         {

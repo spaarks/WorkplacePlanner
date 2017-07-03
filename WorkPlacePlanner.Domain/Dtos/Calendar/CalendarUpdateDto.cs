@@ -6,11 +6,11 @@ namespace WorkPlacePlanner.Domain.Dtos.Calendar
 {
     public class CalendarUpdateDto
     {
-        public int Id { get; set; }
-
-        public int EntryId { get; set; }
+        public int UsageTypeId { get; set; }
 
         public int TeamMembershipId { get; set; }
+
+        public DateTime StartDate { get; set; }
 
         public DateTime EndDate { get; set; }
 

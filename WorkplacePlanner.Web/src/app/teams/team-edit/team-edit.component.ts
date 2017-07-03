@@ -27,10 +27,15 @@ export class TeamEditComponent implements OnInit {
         {
             let id = +params['id'];
             let parentTeamId = +params['parentTeamId'];
-            this.teamService.getTeam(id)
+            this.teamService.get(id)
                         .then(team => this.team = (team != null ? team : new Team()))
-                        .then(team => this.teamService.getTeam(parentTeamId > 0 ? parentTeamId : team.parentTeamId)
-                        .then(team => this.parentTeam = team));           
+                        .then(() =>  {
+                            if(this.team != null && this.team.parentTeamId > 0){
+                                this.teamService.get(this.team.parentTeamId).then(team => this.parentTeam = team);
+                            }      
+                        });
+                        //.then(team => this.teamService.get(parentTeamId > 0 ? parentTeamId : team.parentTeamId)
+                        //.then(team => this.parentTeam = team));           
         });
     }
 
@@ -41,7 +46,7 @@ export class TeamEditComponent implements OnInit {
 
     onSubmit(): void {
         if(this.team.id) {
-            this.teamService.update(this.team).then(team => this.team = team);
+            this.teamService.update(this.team);
         } else {
             this.team.parentTeamId =  this.parentTeam != null ? this.parentTeam.id : null;
             this.teamService.create(this.team).then(team => this.team = team);

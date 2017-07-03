@@ -84,6 +84,12 @@ namespace WorkplacePlanner.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Teams", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Teams_Teams_ParentTeamId",
+                        column: x => x.ParentTeamId,
+                        principalTable: "Teams",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -287,6 +293,11 @@ namespace WorkplacePlanner.Data.Migrations
                 table: "Teams",
                 column: "Name",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Teams_ParentTeamId",
+                table: "Teams",
+                column: "ParentTeamId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TeamDefaultUsageTypes_TeamId",

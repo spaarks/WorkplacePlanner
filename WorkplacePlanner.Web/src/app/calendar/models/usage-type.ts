@@ -1,7 +1,7 @@
 export class UsageType {
     id: number; 
-    code: string; 
+    abbreviation: string; 
     description: string;
-    colourCode: string;
+    colorCode: string;
     selectable: boolean;
 }

@@ -10,68 +10,55 @@ import { TreeTableNode } from '../../shared/models/tree-table-node';
 
 @Injectable()
 export class TeamService {
-    constructor(private dataService: DataService) {}
+    constructor(private dataService: DataService) { }
 
-    //TODO: This is just for testing purposes. Move this to appropriate module.
-    getTeams(parentTeamId: number): Promise<Team[]> {
-        return this.dataService.get('teams', '')
+    create(team: Team): Promise<Team> {
+        return this.dataService.create('teams', '', team)
             .toPromise()
-            .then(response => response.json().data as Team[])
-            .then(teams => this.filterTeams(teams, parentTeamId)); //TODO           
-            // .catch(this.handleError);
+            .then(() => team);
     }
 
-    filterTeams(teams: Team[], parentTeamId: number) {
-        var childTeams = this.getChildTeamIds(teams, parentTeamId);
-        return teams.filter(t => parentTeamId == null || childTeams.findIndex(ct => ct == t.id) >= 0 );
+    //TODO: This is just for testing purposes. Move this to appropriate module.
+    get(id: number): Promise<Team> {
+        console.log(id);
+        return this.dataService.getById('teams', '', id)
+            .toPromise()
+            .then(response => response.json() as Team);
+    }
+
+    getAll(): Promise<Team[]> {
+        return this.dataService.get('teams')
+            .toPromise()
+            .then((response) => response.json() as Team[]);
+    }
+
+    public getSubTeams(parentId: number): Promise<Team[]> {
+        return this.dataService.getById('teams', 'subteams', parentId)
+            .toPromise()
+            .then(response => response.json() as Team[]);
     }
 
     getTeamsTree(parentTeamId?: number): Promise<TreeTableNode[]> {
-        return this.getTeams(parentTeamId).then(data => this.createTeamTree(data, parentTeamId));
+        var promise = parentTeamId == null ? this.getAll() : this.getSubTeams(parentTeamId);
+        return promise.then(data => this.createTeamTree(data, parentTeamId));
     }
 
-    getTeam(id: number) { //Modify this after pluging the web api
-        return this.getTeams(null)
-            .then(teams => teams.find(t => t.id == id));
-    }
-
-    update(team: Team): Promise<Team> {
-       return this.dataService.update('teams', '', team.id, team)
-            .toPromise()
-            .then(() => team);            
-    }
-
-    create(team: Team): Promise<Team> {
-       return this.dataService.create('teams', '', team)
-            .toPromise()
-            .then(() => team);            
-    }
-
-    getChildTeamIds(teams: Team[], parentTeamId: number): number[] {
-        var ids: number[] = [];
-
-        var subTeams = teams.filter(t => parentTeamId == null || t.parentTeamId == parentTeamId);
-        if( subTeams.length > 0 ) {
-            subTeams.forEach(element => {
-                ids.push(element.id);
-                var childIds = this.getChildTeamIds(teams, element.id);
-                ids = ids.concat(childIds);
-            });                        
-        }
-        return ids;     
+    update(team: Team): Promise<any> {
+        return this.dataService.update('teams', '', team)
+            .toPromise();            
     }
 
     getManagersList(team: Team): string {
-        if(team && team.managers){
-            return team.managers.map(function(element){
-                return element.name;
+        if (team && team.managers) {
+            return team.managers.map(function (element) {
+                return element.firstName + ' ' + element.lastName;
             }).join(', ');
-        }else {
+        } else {
             return '';
         }
     }
 
-    private createTeamTree(teams: Team[], parentTeamId: number) : TreeTableNode[]{
+    private createTeamTree(teams: Team[], parentTeamId: number): TreeTableNode[] {
         var teamTree = this.appendSubTeams(teams, parentTeamId, 0);
         return teamTree;
     }
@@ -81,7 +68,7 @@ export class TeamService {
 
         var childTeams = teams.filter(team => team.parentTeamId == parentTeamId);
 
-        if(childTeams.length > 0 ) {
+        if (childTeams.length > 0) {
             childTeams.forEach(team => {
                 var node = new TreeTableNode();
                 node.data = team;
@@ -89,10 +76,10 @@ export class TeamService {
                 var supperChileTeams = this.appendSubTeams(teams, team.id, level + 1);
                 node.hasChildren = supperChileTeams.length > 0;
                 node.expanded = true;
-                subTeams.push(node);                
+                subTeams.push(node);
                 subTeams = subTeams.concat(supperChileTeams);
-            });        
-        }        
+            });
+        }
         return subTeams;
-    }   
+    }
 }

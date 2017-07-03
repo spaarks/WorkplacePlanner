@@ -9,6 +9,7 @@ using WorkPlacePlanner.Domain.Dtos.Team;
 using WorkPlacePlanner.Domain.Dtos.Calendar;
 using Xunit;
 using System.Linq;
+using WorkplacePlanner.Utills.CustomExceptions;
 
 namespace WorkplacePlanner.Test
 {
@@ -43,7 +44,7 @@ namespace WorkplacePlanner.Test
 
                 using (var context = new DataContext(options))
                 {
-                    var service = CreateCalendarService(context);                   
+                    var service = CreateCalendarService(context);
 
                     var calendarRows = service.GetCalendar(teamId, month);
 
@@ -111,16 +112,16 @@ namespace WorkplacePlanner.Test
             }
 
             [Theory]
-            [InlineData(1, "2017-6-1", "alex@yopmail.com", "2017-6-6", 2)]
-            [InlineData(1, "2017-6-1", "alex@yopmail.com", "2017-6-7", 2)]
-            [InlineData(1, "2017-6-1", "alex@yopmail.com", "2017-6-10", 4)]
-            [InlineData(1, "2017-6-1", "alex@yopmail.com", "2017-6-15", 1)]
-            [InlineData(1, "2017-6-1", "alex@yopmail.com", "2017-6-22", 3)]
-            [InlineData(1, "2017-6-1", "alex@yopmail.com", "2017-6-24", 4)]
-            [InlineData(1, "2017-8-1", "alex@yopmail.com", "2017-8-10", 2)]
-            [InlineData(1, "2017-8-1", "alex@yopmail.com", "2017-8-14", 1)]
-            [InlineData(1, "2017-7-1", "glen@yopmail.com", "2017-7-8", 3)]
-            public void WhenValidDataExists_ReturnsExactCalendersEntries(int teamId, DateTime month, string personEmail, DateTime date, int usageTypeId)
+            [InlineData(1, "2017-6-1", "alex@yopmail.com", "2017-6-6", 2, 1)]
+            [InlineData(1, "2017-6-1", "alex@yopmail.com", "2017-6-7", 2, 1)]
+            [InlineData(1, "2017-6-1", "alex@yopmail.com", "2017-6-10", 4, 1)]
+            [InlineData(1, "2017-6-1", "alex@yopmail.com", "2017-6-15", 1, 1)]
+            [InlineData(1, "2017-6-1", "alex@yopmail.com", "2017-6-22", 3, 1)]
+            [InlineData(1, "2017-6-1", "alex@yopmail.com", "2017-6-24", 4, 1)]
+            [InlineData(1, "2017-8-1", "alex@yopmail.com", "2017-8-10", 2, 1)]
+            [InlineData(1, "2017-8-1", "alex@yopmail.com", "2017-8-14", 1, 1)]
+            [InlineData(1, "2017-7-1", "glen@yopmail.com", "2017-7-8", 3, 2)]
+            public void WhenValidDataExists_ReturnsExactCalendersEntries(int teamId, DateTime month, string personEmail, DateTime date, int usageTypeId, int teamMembershipId)
             {
                 var options = Helper.GetContextOptions();
 
@@ -136,19 +137,34 @@ namespace WorkplacePlanner.Test
                     var calendarEntry = calendarRow.CalendarEntries.Where(e => e.Date == date).FirstOrDefault();
 
                     Assert.Equal(usageTypeId, calendarEntry.UsageTypeId);
+                    Assert.Equal(teamMembershipId, calendarEntry.TeamMembershipId);
+
                 }
             }
         }
 
-        public class GetCalendarMetaData
+        public class GetCalendarEntries
         {
             [Theory]
-            [InlineData(1, "2017-1-5", 1, "Sauron@yopmail.com")]
-            [InlineData(1, "2017-4-1", 2, "Prodo@yopmail.com")]
-            [InlineData(2, "2017-5-1", 1, "Sauron@yopmail.com")]
-            [InlineData(3, "2017-8-1", 2, "Bilbo@yopmail.com")]
-            [InlineData(3, "2017-7-1", 2, "Piping@yopmail.com")]
-            public void WhenManagersExists_ReturnCorrectData(int teamId, DateTime date, int managerCount, string managerEmail)
+            
+            [InlineData(1, "2017-1-1", 31)]
+            [InlineData(1, "2017-2-1", 28)]
+            [InlineData(1, "2017-4-1", 30)]
+            [InlineData(1, "2017-5-1", 31)]
+            [InlineData(1, "2017-6-1", 30)]
+            [InlineData(1, "2017-7-1", 31)]
+            [InlineData(1, "2017-8-1", 31)]
+            [InlineData(1, "2017-9-1", 30)]
+            [InlineData(1, "2017-12-31",31)]
+            [InlineData(1, "2018-2-1", 28)]
+            [InlineData(2, "2017-2-1", 28)]
+            [InlineData(2, "2017-3-1", 31)]
+            [InlineData(2, "2017-4-1", 30)]
+            [InlineData(2, "2017-6-1", 30)]
+            [InlineData(2, "2017-11-1", 30)]
+            [InlineData(2, "2018-1-1", 31)]
+            [InlineData(2, "2020-2-1", 29)]
+            public void WhenValidDataExists_ReturnsCorrectEntryCounts(int teamMembershipId, DateTime month, int calendarEntryCount)
             {
                 var options = Helper.GetContextOptions();
 
@@ -158,22 +174,19 @@ namespace WorkplacePlanner.Test
                 {
                     var service = CreateCalendarService(context);
 
-                    var metaData = service.GetCalendarMetaData(teamId, date);
+                    var calendarEntries = service.GetCalendarEntries(teamMembershipId, month);
 
-                    var managers = metaData.TeamManagers;
-
-                    Assert.True(managers.Where(m => m.Email == managerEmail).Any());
-                    Assert.Equal(managerCount, managers.Count);
-                    Assert.Equal(5, metaData.UsageTypes.Count);
+                    Assert.Equal(calendarEntryCount, calendarEntries.Count);
                 }
             }
 
             [Theory]
-            [InlineData(1, "2016-12-31")]
-            [InlineData(2, "2017-4-1")]
-            [InlineData(3, "2017-1-1")]
-            [InlineData(4, "2017-6-1")]
-            public void WhenManagersNotExists_ReturnEmptyList(int teamId, DateTime date)
+            [InlineData(1, "2017-6-1", "2017-6-6", 2, "Unit Testing-Working From Home")]
+            [InlineData(1, "2017-6-1", "2017-6-15", 1, "Unit Testing-In Office")]
+            [InlineData(1, "2017-6-1", "2017-6-8", 5, "")]
+            [InlineData(1, "2017-6-1", "2017-6-25", 4, "")]
+            [InlineData(2, "2017-7-1", "2017-7-8", 3, "Unit Testing-Out Of Office")]
+            public void WhenValidDataExists_ReturnsCorrectUsageTypes(int teamMembershipId, DateTime month, DateTime testDate, int expectedUsageTypeId, string expectedComment)
             {
                 var options = Helper.GetContextOptions();
 
@@ -183,17 +196,425 @@ namespace WorkplacePlanner.Test
                 {
                     var service = CreateCalendarService(context);
 
-                    var metaData = service.GetCalendarMetaData(teamId, date);
+                    var calendarEntries = service.GetCalendarEntries(teamMembershipId, month);
 
-                    var managers = metaData.TeamManagers;
-                   
-                    Assert.Equal(0, managers.Count);
-                    Assert.Equal(5, metaData.UsageTypes.Count);
+                    var calendarEntry = calendarEntries.Where(e => e.Date == testDate).First();
+
+                    Assert.Equal(expectedUsageTypeId, calendarEntry.UsageTypeId);
+                    Assert.Equal(expectedComment, calendarEntry.Comment);
+                }
+            }
+
+            [Fact]
+            public void WhenPassingIncorrentMembershipId_ThrowsException()
+            {
+                var options = Helper.GetContextOptions();
+
+                SetupCalendarTestData(options);
+
+                using (var context = new DataContext(options))
+                {
+                    var service = CreateCalendarService(context);
+
+                    Assert.Throws<NullReferenceException>(() => service.GetCalendarEntries(1001, new DateTime(2017, 7, 1)));
                 }
             }
         }
 
-        #region Setup Test Data
+        public class UpdateCalendar
+        {
+            public int InvalidDateRageException { get; private set; }
+
+            [Theory]
+            [InlineData(1, "2017-6-7", 3, "Out of office - Unit test")]
+            [InlineData(1, "2017-6-12", 2, "Work from home - Unit test")]
+            [InlineData(1, "2017-12-14", 1, "Comt to Office - Unit test")]
+            [InlineData(2, "2017-6-6", 1, "Out of office - Unit Test")]
+            public void SingleDayAtATime_UpdateSuccessfully(int teamMembershipId, DateTime date, int usageTypeId, string comment)
+            {
+                var options = Helper.GetContextOptions();
+
+                SetupCalendarTestData(options);
+
+                using (var context = new DataContext(options))
+                {
+                    var service = CreateCalendarService(context);
+
+                    var data = new CalendarUpdateDto {
+                        TeamMembershipId = teamMembershipId,
+                        StartDate = date,
+                        EndDate = date,
+                        UsageTypeId = usageTypeId,
+                        Comment = comment
+                    };
+
+                    service.UpdateCalendar(data);
+
+                    var calendarEntries = service.GetCalendarEntries(teamMembershipId, date);
+
+                    var updatedEntry = calendarEntries.Where(e => e.Date == date).FirstOrDefault();
+
+                    ValidateCalendarEntry(updatedEntry, date, usageTypeId, comment);
+                }
+            }
+
+            [Theory]
+            [InlineData(1, "2017-6-4", 3, "Out of office - Unit test")]
+            [InlineData(1, "2017-6-24", 2, "Work from home - Unit test")]
+            [InlineData(1, "2017-12-23", 1, "Comt to Office - Unit test")]
+            [InlineData(2, "2018-2-24", 1, "Out of office - Unit Test")]
+            public void DayOnWeekend_DoNotUpdate(int teamMembershipId, DateTime date, int usageTypeId, string comment)
+            {
+                var options = Helper.GetContextOptions();
+
+                SetupCalendarTestData(options);
+
+                using (var context = new DataContext(options))
+                {
+                    var service = CreateCalendarService(context);
+
+                    var data = new CalendarUpdateDto
+                    {
+                        TeamMembershipId = teamMembershipId,
+                        StartDate = date,
+                        EndDate = date,
+                        UsageTypeId = usageTypeId,
+                        Comment = comment
+                    };
+
+                    service.UpdateCalendar(data);
+
+                    var calendarEntries = service.GetCalendarEntries(teamMembershipId, date);
+
+                    var updatedEntry = calendarEntries.Where(e => e.Date == date).FirstOrDefault();
+
+                    ValidateCalendarEntry(updatedEntry, date, 4, "");
+                }
+            }
+
+            [Theory]
+            [InlineData(1, "2017-6-8", 3, "Out of office - Unit test")]
+            [InlineData(1, "2017-7-6", 2, "Work from home - Unit test")]
+            [InlineData(1, "2017-12-25", 1, "Comt to Office - Unit test")]
+            [InlineData(2, "2017-12-26", 1, "Out of office - Unit Test")]
+            public void Holiday_DoNotUpdate(int teamMembershipId, DateTime date, int usageTypeId, string comment)
+            {
+                var options = Helper.GetContextOptions();
+
+                SetupCalendarTestData(options);
+
+                using (var context = new DataContext(options))
+                {
+                    var service = CreateCalendarService(context);
+
+                    var data = new CalendarUpdateDto
+                    {
+                        TeamMembershipId = teamMembershipId,
+                        StartDate = date,
+                        EndDate = date,
+                        UsageTypeId = usageTypeId,
+                        Comment = comment
+                    };
+
+                    service.UpdateCalendar(data);
+
+                    var calendarEntries = service.GetCalendarEntries(teamMembershipId, date);
+
+                    var updatedEntry = calendarEntries.Where(e => e.Date == date).FirstOrDefault();
+
+                    ValidateCalendarEntry(updatedEntry, date, 5, "");
+                }
+            }
+
+            [Theory]
+            [InlineData(1, "2017-6-12", "2017-6-16",  3, "Out of office - Unit test")]
+            [InlineData(1, "2017-6-19", "2017-6-23", 2, "Work from home - Unit test")]
+            [InlineData(1, "2017-10-16", "2017-10-20", 3, "Out of office - Unit test")]
+            [InlineData(1, "2017-12-12", "2017-12-14", 3, "In Office - Unit Test")]
+            public void MultipleDaysInSameWeek_UpdateSuccessfully(int teamMembershipId, DateTime startDate, DateTime endDate, int usageTypeId, string comment)
+            {
+                var options = Helper.GetContextOptions();
+
+                SetupCalendarTestData(options);
+
+                using (var context = new DataContext(options))
+                {
+                    var service = CreateCalendarService(context);
+
+                    var data = new CalendarUpdateDto
+                    {
+                        TeamMembershipId = teamMembershipId,
+                        StartDate = startDate,
+                        EndDate = endDate,
+                        UsageTypeId = usageTypeId,
+                        Comment = comment
+                    };
+
+                    service.UpdateCalendar(data);
+
+                    var calendarEntries = service.GetCalendarEntries(teamMembershipId, startDate);
+
+                    for (DateTime date = startDate; date <= endDate; date = date.AddDays(1))
+                    {
+                        var updatedEntry = calendarEntries.Where(e => e.Date == date).FirstOrDefault();
+                        ValidateCalendarEntry(updatedEntry, date, usageTypeId, comment);
+                    }
+                }
+            }
+
+            [Theory]
+            [InlineData(1, "2017-6-1", "2017-6-30", 3, "Out of office - Unit test")]
+            [InlineData(1, "2017-12-1", "2017-12-31", 2, "Working from home - Unit test")]
+            [InlineData(1, "2017-8-1", "2017-8-31", 1, "In office - Unit test")]
+            public void MultipleDaysInSameMonth_IgnoreNonWorkingDays(int teamMembershipId, DateTime startDate, DateTime endDate, int usageTypeId, string comment)
+            {
+                var options = Helper.GetContextOptions();
+
+                SetupCalendarTestData(options);
+
+                using (var context = new DataContext(options))
+                {
+                    var service = CreateCalendarService(context);
+
+                    var data = new CalendarUpdateDto
+                    {
+                        TeamMembershipId = teamMembershipId,
+                        StartDate = startDate,
+                        EndDate = endDate,
+                        UsageTypeId = usageTypeId,
+                        Comment = comment
+                    };
+
+                    service.UpdateCalendar(data);
+
+                    var calendarEntries = service.GetCalendarEntries(teamMembershipId, startDate);
+
+                    var workingDays = service.GetWorkingWeekDays();
+                    var holidays = service.GetHolidaysOfMonth(startDate);
+
+                    for (DateTime date = startDate; date <= endDate; date = date.AddDays(1))
+                    {
+                        var updatedEntry = calendarEntries.Where(e => e.Date == date).FirstOrDefault();
+
+                        if (!workingDays.Contains((int)date.DayOfWeek))
+                        {
+                            ValidateCalendarEntry(updatedEntry, date, 4, "");
+                        }
+                        else if (holidays.Any(h => h.Date == date))
+                        {
+                            ValidateCalendarEntry(updatedEntry, date, 5, "");
+                        }
+                        else
+                        {
+                            ValidateCalendarEntry(updatedEntry, date, usageTypeId, comment);
+                        }                      
+                    }
+                }
+            }
+
+            [Theory]
+            [InlineData(1, "2017-1-1", "2017-12-31", 3, "Out of office - Unit test")]
+            [InlineData(1, "2020-1-1", "2020-12-31", 2, "Work from home - Unit test")]
+            public void EntireYear_IgnoreNonWorkingDays(int teamMembershipId, DateTime startDate, DateTime endDate, int usageTypeId, string comment)
+            {
+                var options = Helper.GetContextOptions();
+
+                SetupCalendarTestData(options);
+
+                using (var context = new DataContext(options))
+                {
+                    var service = CreateCalendarService(context);
+
+                    var data = new CalendarUpdateDto
+                    {
+                        TeamMembershipId = teamMembershipId,
+                        StartDate = startDate,
+                        EndDate = endDate,
+                        UsageTypeId = usageTypeId,
+                        Comment = comment
+                    };
+
+                    service.UpdateCalendar(data);
+
+                    var calendarEntries = service.GetCalendarEntries(teamMembershipId, startDate);
+                    int month = startDate.Month;
+
+                    var workingDays = service.GetWorkingWeekDays();
+                    var holidays = service.GetHolidays(startDate, endDate);
+
+                    for (DateTime date = startDate; date <= endDate; date = date.AddDays(1))
+                    {
+                        if (month != date.Month)
+                        {
+                            month = date.Month;
+                            calendarEntries = service.GetCalendarEntries(teamMembershipId, date);
+                        }
+
+                        var updatedEntry = calendarEntries.Where(e => e.Date == date).FirstOrDefault();
+
+                        if (!workingDays.Contains((int)date.DayOfWeek))
+                        {
+                            ValidateCalendarEntry(updatedEntry, date, 4, "");
+                        }
+                        else if (holidays.Any(h => h.Date == date))
+                        {
+                            ValidateCalendarEntry(updatedEntry, date, 5, "");
+                        }
+                        else
+                        {
+                            ValidateCalendarEntry(updatedEntry, date, usageTypeId, comment);
+                        }
+                    }
+                }
+            }
+
+            [Fact]
+            public void WhenPassingInvalidDateRange_ThrowsInvalidDateRangeExceptionn()
+            {
+                var options = Helper.GetContextOptions();
+
+                SetupCalendarTestData(options);
+
+                using (var context = new DataContext(options))
+                {
+                    var service = CreateCalendarService(context);
+
+                    var data = new CalendarUpdateDto
+                    {
+                        TeamMembershipId = 1,
+                        StartDate = new DateTime(2017, 6, 2),
+                        EndDate = new DateTime(2017, 6, 1),
+                        UsageTypeId = 2,
+                        Comment = "Unit Testing"
+                    };
+
+                    Assert.Throws<InvalidDateRangeException>(() => service.UpdateCalendar(data));
+                }
+            }
+        }
+
+        public class GetHolidays
+        {
+            [Theory]
+            [InlineData("2017-1-1","2017-6-1",0)]
+            [InlineData("2017-6-1", "2017-7-1", 1)]
+            [InlineData("2017-6-8", "2017-6-8", 1)]
+            [InlineData("2017-6-1", "2017-8-1", 2)]
+            [InlineData("2017-6-1", "2018-1-1", 4)]
+            public void WhenPassingDateRange_ReturnHolidays(DateTime stateDate, DateTime endDate, int expectedHolidayCount)
+            {
+                var options = Helper.GetContextOptions();
+
+                SetupHolidaysTestData(options);
+
+                using (var context = new DataContext(options))
+                {
+                    var service = CreateCalendarService(context);
+
+                    var holidays = service.GetHolidays(stateDate, endDate);
+
+                    Assert.Equal(expectedHolidayCount, holidays.Count);
+                }
+            }
+        }
+
+        public class GetHolidaysOfMonth
+        {
+            [Theory]
+            [InlineData("2017-5-1", 0)]
+            [InlineData("2017-6-1", 1)]
+            [InlineData("2017-7-1", 1)]
+            [InlineData("2017-8-1", 0)]
+            [InlineData("2017-12-1", 2)]
+            public void WhenPassingMonth_ReturnHolidays(DateTime month, int expectedHolidayCount)
+            {
+                var options = Helper.GetContextOptions();
+
+                SetupHolidaysTestData(options);
+
+                using (var context = new DataContext(options))
+                {
+                    var service = CreateCalendarService(context);
+
+                    var holidays = service.GetHolidaysOfMonth(month);
+
+                    Assert.Equal(expectedHolidayCount, holidays.Count);
+                }
+            }
+
+            [Theory]
+            [InlineData("2017-6-1", "2017-6-8")]
+            [InlineData("2017-7-1", "2017-7-6")]
+            [InlineData("2017-12-1", "2017-12-25")]
+            [InlineData("2017-12-1", "2017-12-26")]
+            public void WhenPassingMonth_ReturnExactlyHolidays(DateTime month, DateTime expectedHoliday)
+            {
+                var options = Helper.GetContextOptions();
+
+                SetupHolidaysTestData(options);
+
+                using (var context = new DataContext(options))
+                {
+                    var service = CreateCalendarService(context);
+
+                    var holidays = service.GetHolidaysOfMonth(month);
+
+                    Assert.True(holidays.Any(h => h.Date == expectedHoliday));
+                }
+            }
+        }
+
+        public class GetWorkingWeekDays
+        {
+            [Theory]
+            [InlineData(0, false)]
+            [InlineData(1, true)]
+            [InlineData(2, true)]
+            [InlineData(3, true)]
+            [InlineData(4, true)]
+            [InlineData(5, true)]
+            [InlineData(6, false)]
+            public void ReturnWorkingWeekdays(int weekDay, bool isWeekDay)
+            {
+                var options = Helper.GetContextOptions();
+
+                SetupSettingsTestData(options);
+
+                using (var context = new DataContext(options))
+                {
+                    var service = CreateCalendarService(context);
+
+                    var workingWeekDays = service.GetWorkingWeekDays();
+
+                    Assert.Equal(isWeekDay, workingWeekDays.Contains(weekDay));
+                }
+            }
+        }
+      
+        public class GetUsageTypes
+        {
+            [Fact]
+            public void WhenDataExists_ReturnsAll()
+            {
+                var options = Helper.GetContextOptions();
+
+                SetupUsageTypesTestData(options);
+
+                using (var context = new DataContext(options))
+                {
+                    var service = CreateCalendarService(context);
+
+                    var usageTypes = service.GetUsageTypes();
+
+                    Assert.Equal(5, usageTypes.Count);
+                    Assert.True(usageTypes.Any(u => u.Abbreviation == "IO"));
+                    Assert.True(usageTypes.Any(u => u.Abbreviation == "WFH"));
+                    Assert.False(usageTypes.Any(u => u.Abbreviation == ""));
+                }
+            }
+        }
+
+        #region Initialize Service
 
         public static CalendarService CreateCalendarService(DataContext context)
         {
@@ -202,6 +623,10 @@ namespace WorkplacePlanner.Test
             var calendarService = new CalendarService(context, settingsService, teamService);
             return calendarService;
         }
+
+        #endregion
+
+        #region Setup Test Data
 
         public static void SetupCalendarTestData(DbContextOptions<DataContext> options)
         {
@@ -212,10 +637,10 @@ namespace WorkplacePlanner.Test
                 context.Teams.AddRange(GetTeams());
                 context.People.AddRange(GetPeople());
                 context.TeamMemberships.AddRange(GetMemberships());
-                context.CalendarEntries.AddRange(GetCalendarEntries());
+                context.CalendarEntries.AddRange(GetCalendarEntriesList());
                 context.Settings.AddRange(GetSettings());
-                context.UsageTypes.AddRange(GetUsageTypes());
-                context.Holidays.AddRange(GetHolidays());
+                context.UsageTypes.AddRange(GetUsageTypesList());
+                context.Holidays.AddRange(GetHolidaysList());
                 context.TeamDefaultUsageTypes.AddRange(GetTeamDefaultUsageType());
                 context.GlobalDefaultUsageTypes.AddRange(GetGlobalDefaultUsageType());
                 context.TeamManagers.AddRange(GetTeamManagers());
@@ -224,15 +649,45 @@ namespace WorkplacePlanner.Test
             }
         }
 
-        public static void SetupUsageTypeTestData(DbContextOptions<DataContext> options)
+        public static void SetupHolidaysTestData(DbContextOptions<DataContext> options)
         {
             using (var context = new DataContext(options))
             {
                 context.Database.EnsureDeleted();
 
-                //context.UsageTypes.AddRange()
+                context.Holidays.AddRange(GetHolidaysList());
+
+                context.SaveChanges();
             }
         }
+
+        public static void SetupSettingsTestData(DbContextOptions<DataContext> options)
+        {
+            using (var context = new DataContext(options))
+            {
+                context.Database.EnsureDeleted();
+                                
+                context.Settings.AddRange(GetSettings());
+               
+                context.SaveChanges();
+            }
+        }
+
+        public static void SetupUsageTypesTestData(DbContextOptions<DataContext> options)
+        {
+            using (var context = new DataContext(options))
+            {
+                context.Database.EnsureDeleted();
+               
+                context.UsageTypes.AddRange(GetUsageTypesList());
+
+                context.SaveChanges();
+            }
+        }
+
+        #endregion
+
+        #region Test Data Preparation
 
         private static List<Team> GetTeams()
         {
@@ -290,7 +745,7 @@ namespace WorkplacePlanner.Test
             return list;
         }
 
-        private static List<CalendarEntry> GetCalendarEntries()
+        private static List<CalendarEntry> GetCalendarEntriesList()
         {
             var calendarEntries = new List<CalendarEntry> {
                 CreateCalendarEntry(1, 1, new DateTime(2017, 6, 6), "Unit Testing-Working From Home", 2),
@@ -317,7 +772,7 @@ namespace WorkplacePlanner.Test
             return settingsList;
         }
 
-        private static List<UsageType> GetUsageTypes()
+        private static List<UsageType> GetUsageTypesList()
         {
             var listUsageTypes = new List<UsageType> {
                 CreateUsageType(1, "In Office", "Working from office", "#f5f5f5", "IO", true, true),
@@ -330,7 +785,7 @@ namespace WorkplacePlanner.Test
             return listUsageTypes;
         }
 
-        private static List<Holiday> GetHolidays()
+        private static List<Holiday> GetHolidaysList()
         {
             var listHolidays = new List<Holiday> {
                 CreateHoliday(1, new DateTime(2017, 6, 8), "Full moon poya day"),
@@ -358,7 +813,7 @@ namespace WorkplacePlanner.Test
         {
             var listGlobalDefaultUsageTypes = new List<GlobalDefaultUsageType>
             {
-                CreateGlobalDefaultUsageType(1, 1, new DateTime(2017, 1, 1), null)               
+                CreateGlobalDefaultUsageType(1, 1, new DateTime(2017, 1, 1), null)
             };
 
             return listGlobalDefaultUsageTypes;
@@ -430,7 +885,7 @@ namespace WorkplacePlanner.Test
         {
             return new CalendarEntry
             {
-                Id = id,
+                //Id = id,
                 TeamMembershipId = teamMembershipId,
                 Date = date,
                 Comments = comments,
@@ -493,7 +948,19 @@ namespace WorkplacePlanner.Test
                 EndDate = endDate
             };
         }
-    }
 
-    #endregion
+        #endregion
+
+        #region Validation
+
+        public static void ValidateCalendarEntry(CalendarEntryDto calendarEntry, DateTime expectedDate, int expectedUsageTypeId, string expectedComment)
+        {
+            Assert.Equal(expectedDate, calendarEntry.Date);
+            Assert.Equal(expectedUsageTypeId, calendarEntry.UsageTypeId);
+            Assert.Equal(expectedComment, calendarEntry.Comment);
+        }
+ 
+        #endregion
+    }
 }
+
