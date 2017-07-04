@@ -8,10 +8,12 @@ export class IndentTreeTableDirective implements OnInit {
 
     @Input() level: number;
 
+    @Input() padding: number = 15;
+
     constructor(private el: ElementRef, private renderer: Renderer) { }       
 
     private setIndentation(): void {        
-        var paddingLeft = 6 + this.level * 15;
+        var paddingLeft = 6 + this.level * this.padding;
         this.renderer.setElementStyle(this.el.nativeElement, 'paddingLeft', paddingLeft + 'px');
         //this.renderer.setElementClass(this.el.nativeElement, 'calendar-today', true);        
     }

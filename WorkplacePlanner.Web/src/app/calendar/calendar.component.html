@@ -3,9 +3,14 @@
         <h5 *ngIf="team"> {{team.name}} <small> <i> {{ getTeamManagers() }} </i> </small></h5>
     </div>
     <div class="col-sm-3 pull-right text-right">
-        <h4>
-            <ft-month-picker (monthChanged)="monthChanged($event)"></ft-month-picker>
-        </h4>
+        <div class="pull-right margn-left-15">
+            <ft-team-picker [selectedTeamId]="defaultTeamId" (teamChanged)="teamChanged($event)" ></ft-team-picker>
+        </div>
+         <div class="pull-right">
+            <h4>
+                <ft-month-picker (monthChanged)="monthChanged($event)"></ft-month-picker>
+            </h4>
+        </div>
     </div>
 </div>
 
@@ -13,7 +18,8 @@
     <table class="table table-bordered table-sm calendar" *ngIf="calendarRows != null && calendarRows.length > 0">
         <thead>
             <th> {{ selectedMonth | date: 'yyyy MMMM' }} </th>
-            <th *ngFor="let usage of calendarRows[0].calendarEntries" class="text-center calendar-date-col calendar-date-col-header" [class.calendar-today]="isToday(usage.date)">
+            <th *ngFor="let usage of calendarRows[0].calendarEntries" class="text-center calendar-date-col calendar-date-col-header"
+                [class.calendar-today]="isToday(usage.date)">
                 {{ usage.date | date: 'EEE dd' }}
             </th>
         </thead>
@@ -27,7 +33,7 @@
                 <td class="text-nowrap"> {{ row.person.firstName }} {{ row.person.lastName }}</td>
 
                 <td *ngFor="let entry of row.calendarEntries" class="calendar-usage-cell" [style.background-color]="getUsageColorCode(entry.usageTypeId)"
-                    ng-disabled="true"  (click)="editCalendar(editDeskUsage, row, entry)">
+                    ng-disabled="true" (click)="editCalendar(editDeskUsage, row, entry)">
                     <i *ngIf="entry.comment" tooltip="{{entry.comment}}" class="fa fa-caret-up fa-rotate-45 comment-icon"> </i>
                 </td>
             </tr>
@@ -39,10 +45,10 @@
 <div class="row">
     <div class="col-sm-12">
         <ng-container *ngFor="let legend of calendarLegends">
-            <div class="col">           
+            <div class="col">
                 <div [style.background-color]="legend.colorCode" class="legend-icon"></div>
                 <div class="legend-text">{{ legend.description }} </div>
-            </div>          
+            </div>
         </ng-container>
     </div>
 </div>

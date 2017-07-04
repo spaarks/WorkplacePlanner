@@ -36,20 +36,29 @@ namespace WorkplacePlanner.WebApi.Controllers
             return team;
         }
 
+        // GET: api/Teams/SubTeams/5
         [HttpGet("SubTeams/{parentId}")]
         public IEnumerable<TeamDto> GetSubTeams(int parentId)
         {
             var teams = _teamService.GetSubTeams(parentId);
             return teams;
         }
+
+        [HttpGet("ActiveTeams")]
+        public IEnumerable<TeamXsDto> GetAllActiveTeams()
+        {
+            var teams = _teamService.GetAllActiveTeams();
+            return teams;
+        }
         
         // POST: api/Teams
         [HttpPost]
-        public void Post([FromBody]string value)
+        public void Post([FromBody]TeamDto data)
         {
+            _teamService.Create(data);
         }
         
-        // PUT: api/Teams/5
+        // PUT: api/Teams
         [HttpPut]
         public void Put([FromBody]TeamDto data)
         {

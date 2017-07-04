@@ -15,6 +15,8 @@ namespace WorkPlacePlanner.Domain.Services
 
         ICollection<TeamDto> GetAll();
 
+        ICollection<TeamXsDto> GetAllActiveTeams();
+
         int GetDefaultUsageType(int teamId, DateTime month);
 
         ICollection<TeamDto> GetSubTeams(int parentId);

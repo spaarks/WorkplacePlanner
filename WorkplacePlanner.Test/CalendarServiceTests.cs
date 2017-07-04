@@ -766,7 +766,8 @@ namespace WorkplacePlanner.Test
         private static List<Setting> GetSettings()
         {
             var settingsList = new List<Setting> {
-                CreateSetting("WorkingWeekDays", "1,2,3,4,5")
+                CreateSetting("WorkingWeekDays", "1,2,3,4,5"),
+                CreateSetting("UnEditableUsageTypes", "NBD,MH")                
             };
 
             return settingsList;

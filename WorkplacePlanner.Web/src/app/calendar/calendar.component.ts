@@ -35,6 +35,8 @@ export class CalendarComponent implements OnInit {
     isUpdateCalendar: boolean = false;
     editingEndDate: Date;
 
+    defaultTeamId: number = 1;
+
     constructor(private calendarService: CalendarService, private teamService: TeamService) { }
 
     ngOnInit(): void {
@@ -59,7 +61,11 @@ export class CalendarComponent implements OnInit {
                 this.calendarLegends = this.calendarLegends.concat(this.calendarService.getUsageStates());
             });
 
-        this.teamService.get(1) //TODO   
+            this.loadTeamAndCalendar(this.defaultTeamId);
+    }
+
+    loadTeamAndCalendar(teamId: number) {
+         this.teamService.get(teamId)
             .then(team => this.team = team)
             .then(() => { this.loadCalendar(); });
     }
@@ -112,6 +118,10 @@ export class CalendarComponent implements OnInit {
     monthChanged(date: Date) {
         this.selectedMonth = date;
         this.loadCalendar();
+    }
+
+    teamChanged(teamId: number) {
+        this.loadTeamAndCalendar(teamId);
     }
 
     isToday(date: Date): boolean {

@@ -71,6 +71,7 @@ namespace WorkplacePlanner.Services
         public ICollection<TeamDto> GetAll()
         {
             var teamList = _dataContext.Teams
+                    .OrderBy(t => t.Name)
                    .Select(t => new TeamDto
                    {
                        Id = t.Id,
@@ -89,6 +90,21 @@ namespace WorkplacePlanner.Services
                                         LastName = m.Person.LastName,
                                         Email = m.Person.Email
                                     }).ToArray()
+                   }).ToList();
+
+            return teamList;
+        }
+
+        public ICollection<TeamXsDto> GetAllActiveTeams()
+        {
+            var teamList = _dataContext.Teams
+                   .Where(t => t.Active == true)
+                   .OrderBy(t => t.Name)
+                   .Select(t => new TeamXsDto
+                   {
+                       Id = t.Id,
+                       Name = t.Name,
+                       ParentTeamId = t.ParentTeamId                     
                    }).ToList();
 
             return teamList;
@@ -164,5 +180,7 @@ namespace WorkplacePlanner.Services
 
             _dataContext.SaveChanges();
         }
+
+      
     }
 }

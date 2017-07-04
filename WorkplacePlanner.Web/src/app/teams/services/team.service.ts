@@ -3,6 +3,7 @@ import { Headers, Http } from '@angular/http';
 import 'rxjs/add/operator/toPromise';
 
 import { Team } from '../models/team';
+import { TeamXs } from '../models/team-xs';
 import { Person } from '../models/person'
 import { DataService } from '../../shared/services/data.service';
 import { TreeNode } from 'primeng/components/common/api';
@@ -12,43 +13,38 @@ import { TreeTableNode } from '../../shared/models/tree-table-node';
 export class TeamService {
     constructor(private dataService: DataService) { }
 
-    create(team: Team): Promise<Team> {
+    public create(team: Team): Promise<Team> {
         return this.dataService.create('teams', '', team)
             .toPromise()
             .then(() => team);
     }
 
     //TODO: This is just for testing purposes. Move this to appropriate module.
-    get(id: number): Promise<Team> {
+    public get(id: number): Promise<Team> {
         console.log(id);
         return this.dataService.getById('teams', '', id)
             .toPromise()
             .then(response => response.json() as Team);
     }
 
-    getAll(): Promise<Team[]> {
+    public getAll(): Promise<Team[]> {
         return this.dataService.get('teams')
             .toPromise()
             .then((response) => response.json() as Team[]);
     }
 
-    public getSubTeams(parentId: number): Promise<Team[]> {
-        return this.dataService.getById('teams', 'subteams', parentId)
+    public getAllActiveTeams() : Promise<TeamXs[]> {
+        return this.dataService.get('teams','activeTeams')
             .toPromise()
-            .then(response => response.json() as Team[]);
+            .then((response) => response.json() as TeamXs[]);
     }
 
-    getTeamsTree(parentTeamId?: number): Promise<TreeTableNode[]> {
-        var promise = parentTeamId == null ? this.getAll() : this.getSubTeams(parentTeamId);
-        return promise.then(data => this.createTeamTree(data, parentTeamId));
+    public getAllActiveTeamsTree() : Promise<TreeTableNode[]> {
+        return this.getAllActiveTeams()
+                .then(data => this.createTeamTree(data, null));
     }
 
-    update(team: Team): Promise<any> {
-        return this.dataService.update('teams', '', team)
-            .toPromise();            
-    }
-
-    getManagersList(team: Team): string {
+    public getManagersList(team: Team): string {
         if (team && team.managers) {
             return team.managers.map(function (element) {
                 return element.firstName + ' ' + element.lastName;
@@ -58,7 +54,23 @@ export class TeamService {
         }
     }
 
-    private createTeamTree(teams: Team[], parentTeamId: number): TreeTableNode[] {
+    public getSubTeams(parentId: number): Promise<Team[]> {
+        return this.dataService.getById('teams', 'subteams', parentId)
+            .toPromise()
+            .then(response => response.json() as Team[]);
+    }
+
+    public getTeamsTree(parentTeamId?: number): Promise<TreeTableNode[]> {
+        var promise = parentTeamId == null ? this.getAll() : this.getSubTeams(parentTeamId);
+        return promise.then(data => this.createTeamTree(data, parentTeamId));
+    }
+
+    public update(team: Team): Promise<any> {
+        return this.dataService.update('teams', '', team)
+            .toPromise();
+    }
+
+    private createTeamTree(teams: any[], parentTeamId: number): TreeTableNode[] {
         var teamTree = this.appendSubTeams(teams, parentTeamId, 0);
         return teamTree;
     }

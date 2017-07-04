@@ -27,7 +27,7 @@ import { YearPickerComponent } from './year-picker/year-picker.component';
         HttpModule,
         //InMemoryWebApiModule.forRoot(InMemoryDataService),
         TooltipModule.forRoot(),
-        DatepickerModule.forRoot()
+        DatepickerModule.forRoot()       
     ],    
     declarations: [
         MonthPickerComponent,

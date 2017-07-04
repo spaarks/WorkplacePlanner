@@ -1,0 +1,19 @@
+.team-picker {
+    text-align: left; 
+    font-weight: bolder;
+}
+
+.team-picker-template {
+    position: relative;
+    height: 25px;
+}
+
+.team-picker-label {
+    font-size:14px; 
+    margin-top:4px
+}
+
+.toggle-icon {
+    display: inline-block;
+    width: 8px;
+}

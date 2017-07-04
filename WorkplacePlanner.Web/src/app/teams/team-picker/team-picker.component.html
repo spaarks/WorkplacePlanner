@@ -1,0 +1,14 @@
+<p-dropdown [options]="selectItems" [(ngModel)]="selectedTeam" [style]="{'width':'150px'}" (onChange)="selectionChanged($event)" [filter]="true"
+    class="team-picker" [dataKey]="data">
+    <ng-template let-team pTemplate="item">
+        <div class="ui-helper-clearfix team-picker-template" ft-indent-tree-table [level]="team.value.level"
+            [padding]="10">            
+            <div class="team-picker-label">
+                <span class="toggle-icon">
+                    <i *ngIf="team.value.hasChildren" class="fa fa-caret-down"></i>
+                </span>
+                {{team.label}}
+            </div>
+        </div>
+    </ng-template>
+</p-dropdown>

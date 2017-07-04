@@ -269,6 +269,66 @@ namespace WorkplacePlanner.Test
             }           
         }
 
+        public class GetAllActiveTeams
+        {
+            [Fact]
+            public void WhenTeamsExists_ReturnAllActiveTeams()
+            {
+                var options = Helper.GetContextOptions();
+
+                SetupTestData(options);
+
+                using (var context = new DataContext(options))
+                {
+                    var service = new TeamService(context);
+                    var teams = service.GetAllActiveTeams();
+
+                    Assert.Equal(7, teams.Count);                    
+                }
+            }
+
+            [Fact]
+            public void DoNotReturnInactiveTeams()
+            {
+                var options = Helper.GetContextOptions();
+
+                SetupTestData(options);
+
+                using (var context = new DataContext(options))
+                {
+                    var service = new TeamService(context);
+                    var teams = service.GetAllActiveTeams();
+
+                    var team = teams.Where(t => t.Name == "CIC").FirstOrDefault();
+                    Assert.Null(team);
+                }
+            }
+
+
+            [Theory]
+            [InlineData(1, null)]
+            [InlineData(2, 1)]
+            [InlineData(5, 4)]
+            [InlineData(6, 4)]
+            [InlineData(7, 5)]
+            public void WhenTeamsExists_ReturnCorrentParentTeamId(int teamId, int? expectedParentId)
+            {
+                var options = Helper.GetContextOptions();
+
+                SetupTestData(options);
+
+                using (var context = new DataContext(options))
+                {
+                    var service = new TeamService(context);
+                    var teams = service.GetAllActiveTeams();
+
+                    var team = teams.Where(t => t.Id == teamId).FirstOrDefault();
+
+                    Assert.Equal(expectedParentId, team.ParentTeamId);
+                }
+            }
+        }
+
         public class GetSubTeams
         {
             [Theory]
