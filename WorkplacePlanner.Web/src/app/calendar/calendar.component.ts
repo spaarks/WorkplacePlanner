@@ -5,10 +5,11 @@ import { CalendarEntry } from './models/calendar-entry';
 import { CalendarRow } from './models/calendar-row';
 import { TeamService } from '../teams/services/team.service';
 import { Team } from '../teams/models/team';
-import { Person } from '../teams/models/person';
+import { User } from '../users/models/user';
 import { CalendarLegend } from './models/calendar-legend';
 import { UsageType } from './models/usage-type';
 import { CalendarUpdateDto } from './models/calendar-update-dto';
+import { MessageService } from '../core/services/message.service';
 
 @Component({
     moduleId: module.id,
@@ -22,8 +23,8 @@ export class CalendarComponent implements OnInit {
     selectedMonth: Date = new Date();
     team: Team;
 
-    editPerson: Person = null;
-    editCalendarEntry: CalendarEntry = null;
+    editingUser: User = null;
+    editingCalendarEntry: CalendarEntry = null;
 
     usageTypes: UsageType[];
     editableUsageTypes: UsageType[];
@@ -37,7 +38,9 @@ export class CalendarComponent implements OnInit {
 
     defaultTeamId: number = 1;
 
-    constructor(private calendarService: CalendarService, private teamService: TeamService) { }
+    constructor(private calendarService: CalendarService, 
+            private teamService: TeamService,
+            private messageService: MessageService) { }
 
     ngOnInit(): void {
         this.calendarService.getUsageTypes()
@@ -89,8 +92,8 @@ export class CalendarComponent implements OnInit {
 
     editCalendar(content, row: CalendarRow, editingEntry: CalendarEntry) {
         if (row.hasPermissionToEdit && editingEntry.editable) {
-            this.editPerson = row.person;
-            this.editCalendarEntry = Object.assign({}, editingEntry);
+            this.editingUser = row.user;
+            this.editingCalendarEntry = Object.assign({}, editingEntry);
             this.editingEndDate = editingEntry.date;
             this.isUpdateCalendar = true;
         }
@@ -98,10 +101,10 @@ export class CalendarComponent implements OnInit {
 
     updateCalendar() {
         let data = new CalendarUpdateDto();
-        data.teamMembershipId = this.editCalendarEntry.teamMembershipId;
-        data.usageTypeId = this.editCalendarEntry.usageTypeId;
-        data.comment = this.editCalendarEntry.comment;
-        data.startDate = this.editCalendarEntry.date;
+        data.teamMembershipId = this.editingCalendarEntry.teamMembershipId;
+        data.usageTypeId = this.editingCalendarEntry.usageTypeId;
+        data.comment = this.editingCalendarEntry.comment;
+        data.startDate = this.editingCalendarEntry.date;
         data.endDate = this.editingEndDate;
 
         this.calendarService.updateCalendar(data)
@@ -109,9 +112,9 @@ export class CalendarComponent implements OnInit {
                 var row = this.calendarRows.find(r => r.membershipId == data.teamMembershipId);
                 this.calendarService.getCalenderEntries(data.teamMembershipId, this.selectedMonth)
                     .then(data => row.calendarEntries = data);
-
+                    this.messageService.showSuccess('Calendar updated');
             });
-
+            
         this.isUpdateCalendar = false;
     }
 

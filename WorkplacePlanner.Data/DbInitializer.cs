@@ -10,33 +10,33 @@ namespace WorkplacePlanner.Data
     {
         public static void Initialize(DataContext context)
         {
-            //context.Database.EnsureDeleted();
+            context.Database.EnsureDeleted();
             //context.Database.EnsureCreated();
             context.EnsureUptoDate();
 
-            if (context.People.Any())
+            if (context.Users.Any())
                 return;
 
-            var people = new Person[]
+            var people = new User[]
                 {
-                    new Person { FirstName = "Mitch", LastName="Marsh", Email="mitch@yupmail.com", Active=true},
-                    new Person { FirstName = "John", LastName="Smith", Email="john@yupmail.com", Active=true},
-                    new Person { FirstName = "Mike", LastName="Pell", Email="mike@yupmail.com", Active=true},
-                    new Person { FirstName = "Alex", LastName="Bevan", Email="alex@yupmail.com", Active=true},
-                    new Person { FirstName = "David", LastName="Hussey", Email="david@yupmail.com", Active=true},
-                    new Person { FirstName = "Adam", LastName="Marsh", Email="adam@yupmail.com", Active=true},
-                    new Person { FirstName = "Yash", LastName="Varma", Email="yash@yupmail.com", Active=true},
-                    new Person { FirstName = "Ravi", LastName="Weera", Email="ravi@yupmail.com", Active=true},
-                    new Person { FirstName = "Sachin", LastName="Smith", Email="sachin@yupmail.com", Active=true},
-                    new Person { FirstName = "Virat", LastName="Kohli", Email="virat@yupmail.com", Active=true}
+                    new User { FirstName = "Mitch", LastName="Marsh", Email="mitch@yupmail.com", Active=true},
+                    new User { FirstName = "John", LastName="Smith", Email="john@yupmail.com", Active=true},
+                    new User { FirstName = "Mike", LastName="Pell", Email="mike@yupmail.com", Active=true},
+                    new User { FirstName = "Alex", LastName="Bevan", Email="alex@yupmail.com", Active=true},
+                    new User { FirstName = "David", LastName="Hussey", Email="david@yupmail.com", Active=true},
+                    new User { FirstName = "Adam", LastName="Marsh", Email="adam@yupmail.com", Active=true},
+                    new User { FirstName = "Yash", LastName="Varma", Email="yash@yupmail.com", Active=true},
+                    new User { FirstName = "Ravi", LastName="Weera", Email="ravi@yupmail.com", Active=true},
+                    new User { FirstName = "Sachin", LastName="Smith", Email="sachin@yupmail.com", Active=true},
+                    new User { FirstName = "Virat", LastName="Kohli", Email="virat@yupmail.com", Active=true}
                 };
 
-            context.People.AddRange(people);
+            context.Users.AddRange(people);
             context.SaveChanges();
 
             var teams = new Team[]
                 {
-                    new Team { Name = "Spaarks", DeskCount = 5, Active=true},
+                    new Team { Name = "Brickendon", DeskCount = 5, Active=true},
                     new Team { Name = "IPG", DeskCount = 8, Active=true},
                     new Team { Name = "Bonafied", DeskCount = 6, Active=true},
                     new Team { Name = "Texapro", DeskCount = 10, Active=true},

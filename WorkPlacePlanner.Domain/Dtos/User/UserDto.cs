@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace WorkPlacePlanner.Domain.Dtos.Person
-{
-    public class PersonDto
+namespace WorkPlacePlanner.Domain.Dtos.User {
+    public class UserDto
     {
         public int Id { get; set; }
 
@@ -13,5 +12,7 @@ namespace WorkPlacePlanner.Domain.Dtos.Person
         public string LastName { get; set; }
 
         public string Email { get; set; }
+
+        public bool Active { get; set; }
     }
 }

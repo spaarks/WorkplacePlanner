@@ -76,7 +76,7 @@ namespace WorkplacePlanner.Test
                     var service = CreateCalendarService(context);
 
                     var calendarRows = service.GetCalendar(teamId, month);
-                    var calendarRow = calendarRows.Where(r => r.Person.Email == personEmail).FirstOrDefault();
+                    var calendarRow = calendarRows.Where(r => r.User.Email == personEmail).FirstOrDefault();
 
                     Assert.Equal(ioCount, calendarRow.CalendarEntries.Where(e => e.UsageTypeId == 1).Count());
                     Assert.Equal(wfhCount, calendarRow.CalendarEntries.Where(e => e.UsageTypeId == 2).Count());
@@ -101,7 +101,7 @@ namespace WorkplacePlanner.Test
                     var service = CreateCalendarService(context);
 
                     var calendarRows = service.GetCalendar(teamId, month);
-                    var calendarRow = calendarRows.Where(r => r.Person.Email == personEmail).FirstOrDefault();
+                    var calendarRow = calendarRows.Where(r => r.User.Email == personEmail).FirstOrDefault();
 
                     Assert.Equal(ioCount, calendarRow.CalendarEntries.Where(e => e.UsageTypeId == 1).Count());
                     Assert.Equal(wfhCount, calendarRow.CalendarEntries.Where(e => e.UsageTypeId == 2).Count());
@@ -132,7 +132,7 @@ namespace WorkplacePlanner.Test
                     var service = CreateCalendarService(context);
 
                     var calendarRows = service.GetCalendar(teamId, month);
-                    var calendarRow = calendarRows.Where(r => r.Person.Email == personEmail).FirstOrDefault();
+                    var calendarRow = calendarRows.Where(r => r.User.Email == personEmail).FirstOrDefault();
 
                     var calendarEntry = calendarRow.CalendarEntries.Where(e => e.Date == date).FirstOrDefault();
 
@@ -635,7 +635,7 @@ namespace WorkplacePlanner.Test
                 context.Database.EnsureDeleted();
 
                 context.Teams.AddRange(GetTeams());
-                context.People.AddRange(GetPeople());
+                context.Users.AddRange(GetPeople());
                 context.TeamMemberships.AddRange(GetMemberships());
                 context.CalendarEntries.AddRange(GetCalendarEntriesList());
                 context.Settings.AddRange(GetSettings());
@@ -701,9 +701,9 @@ namespace WorkplacePlanner.Test
             return list;
         }
 
-        private static List<Person> GetPeople()
+        private static List<User> GetPeople()
         {
-            var list = new List<Person> {
+            var list = new List<User> {
                 CreatePerson(1, "Alex", "Smith", true, "alex@yopmail.com"),
                 CreatePerson(2, "Glenn", "Maxwell", true, "glen@yopmail.com"),
                 CreatePerson(3, "Adam", "Gilchrist", true, "adam@yopmail.com"),
@@ -846,9 +846,9 @@ namespace WorkplacePlanner.Test
             };
         }
 
-        private static Person CreatePerson(int id, string firstName, string lastName, bool active, string email)
+        private static User CreatePerson(int id, string firstName, string lastName, bool active, string email)
         {
-            return new Person
+            return new User
             {
                 Id = id,
                 FirstName = firstName,

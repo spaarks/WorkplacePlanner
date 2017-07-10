@@ -1,15 +1,10 @@
 ﻿<ft-page-header *ngIf="team" [title]="'Team'" [subTitle]="team.id > 0 ? 'Edit' : 'New'"></ft-page-header>
-
-<div class="row">
+<div class="row">                                       
     <div class="col-sm-4">
         <div class="card">
             <h5 class="card-header">Basic Details</h5>
             <div class="card-block">
                 <form *ngIf="team" (ngSubmit)="onSubmit()" #editForm="ngForm">
-                    <div *ngIf="parentTeam" class="form-group">
-                        <label> Parent Team: </label>
-                        <span class="clickable" [routerLink]="['/teams/edit', parentTeam.id ]"> {{parentTeam.name}} </span>
-                    </div>
                     <div class="form-group">
                         <label> Team Name: </label>
                         <input type="text" class="form-control" maxlength="50" [(ngModel)]="team.name" name="name" #name="ngModel" required />
@@ -17,13 +12,20 @@
                     </div>
                     <div class="form-group">
                         <label> Desks: </label>
-                        <!--<p-spinner [(ngModel)]="team.desks" name="desks" #desks="ngModel" required> </p-spinner>-->
                         <input type="number" class="form-control" [(ngModel)]="team.deskCount" name="desks" #desks="ngModel" required />
                         <div [hidden]="desks.valid" class="alert alert-danger"> Desks count is requred </div>
+                    </div>
+                     <div class="form-group">
+                        <label> Active: </label>
+                        <input type="checkbox" [(ngModel)]="team.active" name="active" />
                     </div>
                     <div class="form-group">
                         <label> Email Notication: </label>
                         <input type="checkbox" [(ngModel)]="team.emailNotificationEnabled" name="emailNotification" />
+                    </div>
+                     <div class="form-group">
+                        <label> Parent Team: </label>
+                        <ft-team-picker [selectedTeamId]="team.parentTeamId" [showEmptyRow]="true" (teamChanged)="parentTeamChanged($event)" ></ft-team-picker>
                     </div>
                     <br />
                     <button type="submit" class="btn btn-primary" [disabled]="!editForm.form.valid"> Save </button>

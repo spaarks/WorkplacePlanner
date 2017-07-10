@@ -4,38 +4,36 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
 
 import { Team } from '../models/team';
 import { TeamService } from '../services/team.service';
+import { MessageService } from '../../core/services/message.service';
 
 @Component({
-    moduleId: module.id,
+    //moduleId: module.id,
     selector: 'ft-edit-team',
-    templateUrl: 'team-edit.component.html'
+    templateUrl: './team-edit.component.html'
 })
 
 export class TeamEditComponent implements OnInit {
     team: Team;
-    parentTeam: Team;
-    
-    model = 1;
 
-    constructor(private route: ActivatedRoute, 
-                private router: Router, 
-                private teamService: TeamService,
-                private location: Location) {}
+    constructor(private route: ActivatedRoute,
+        private router: Router,
+        private teamService: TeamService,
+        private location: Location,
+        private messageService: MessageService) { }
 
     ngOnInit(): void {
-        this.route.params.forEach((params: Params) =>
-        {
+        this.route.params.forEach((params: Params) => {
             let id = +params['id'];
             let parentTeamId = +params['parentTeamId'];
-            this.teamService.get(id)
-                        .then(team => this.team = (team != null ? team : new Team()))
-                        .then(() =>  {
-                            if(this.team != null && this.team.parentTeamId > 0){
-                                this.teamService.get(this.team.parentTeamId).then(team => this.parentTeam = team);
-                            }      
-                        });
-                        //.then(team => this.teamService.get(parentTeamId > 0 ? parentTeamId : team.parentTeamId)
-                        //.then(team => this.parentTeam = team));           
+            if (this.router.url.split(";")[0].endsWith('new')) {
+                this.team = new Team();
+                this.team.parentTeamId = parentTeamId;
+                this.team.active = true;
+            }
+            else {
+                this.teamService.get(id)
+                    .then(team => this.team = team);
+            }
         });
     }
 
@@ -45,18 +43,22 @@ export class TeamEditComponent implements OnInit {
     }
 
     onSubmit(): void {
-        if(this.team.id) {
-            this.teamService.update(this.team);
+        if (this.team.id) {
+            this.teamService.update(this.team)
+                .then(() => this.messageService.showSuccess('Team updated.'));
         } else {
-            this.team.parentTeamId =  this.parentTeam != null ? this.parentTeam.id : null;
-            this.teamService.create(this.team).then(team => this.team = team);
-            //this.teamService.create(this.team).then(team => this.redirectToNewTeam(team));
+            this.teamService.create(this.team)
+                .then(teamId => this.redirectToNewTeam(teamId))
+                .then(() => this.messageService.showSuccess('Team created.'));;
         }
     }
 
-    private redirectToNewTeam(team: Team): void {
-        //console.log(team.id + ' ID, Name :' + team.name);
-        let link = ['/teams/edit', team.id];
+    parentTeamChanged(parentTeamId: number) {
+        this.team.parentTeamId = parentTeamId;
+    }
+
+    private redirectToNewTeam(teamId: number): void {
+        let link = ['/teams/edit', teamId];
         this.router.navigate(link);
     }
 

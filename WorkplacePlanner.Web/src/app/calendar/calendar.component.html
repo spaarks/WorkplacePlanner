@@ -30,7 +30,7 @@
                     [teamDeskTotal]="team.deskCount"> </td>
             </tr>
             <tr *ngFor="let row of calendarRows">
-                <td class="text-nowrap"> {{ row.person.firstName }} {{ row.person.lastName }}</td>
+                <td class="text-nowrap"> {{ row.user.firstName }} {{ row.user.lastName }}</td>
 
                 <td *ngFor="let entry of row.calendarEntries" class="calendar-usage-cell" [style.background-color]="getUsageColorCode(entry.usageTypeId)"
                     ng-disabled="true" (click)="editCalendar(editDeskUsage, row, entry)">
@@ -57,25 +57,25 @@
     <p-dialog header="Edit Desk Usage" [(visible)]="isUpdateCalendar" width="350" modal="true" dismissableMask="true">
         <form (ngSubmit)="updateCalendar()" #editForm="ngForm">
             <div class="form-group">
-                <label> Person: </label> {{ editPerson.firstName }} {{ editPerson.lastName }}
+                <label> Person: </label> {{ editingUser.firstName }} {{ editingUser.lastName }}
             </div>
             <div class="form-group">
-                <label> Date: </label> {{ editCalendarEntry.date | date: 'fullDate'}}
+                <label> Date: </label> {{ editingCalendarEntry.date | date: 'fullDate'}}
             </div>
             <div class="form-group">
                 <label> End Date: </label>
-                <input type="date" class="form-control" [ngModel]="editingEndDate | date:'y-MM-dd'" min="{{editCalendarEntry.date | date: 'y-MM-dd'}}"
+                <input type="date" class="form-control" [ngModel]="editingEndDate | date:'y-MM-dd'" min="{{editingCalendarEntry.date | date: 'y-MM-dd'}}"
                     (ngModelChange)="editingEndDate=$event" name="endDate" required>
             </div>
             <div class="form-group">
                 <label> Usage Type: </label>
-                <select size="1" class="form-control" [(ngModel)]="editCalendarEntry.usageTypeId" name="usageType" required>
+                <select size="1" class="form-control" [(ngModel)]="editingCalendarEntry.usageTypeId" name="usageType" required>
                     <option *ngFor="let usageType of editableUsageTypes" [ngValue]="usageType.id"> {{usageType.description}} </option>
                 </select>
             </div>
             <div class="form-group">
                 <label>Comment: </label>
-                <textarea type="text" rows="2" placeholder="Reason..." name="comment" [(ngModel)]="editCalendarEntry.comment" class="form-control"></textarea>
+                <textarea type="text" rows="2" placeholder="Reason..." name="comment" [(ngModel)]="editingCalendarEntry.comment" class="form-control"></textarea>
             </div>
             <p-footer>
                 <div class="ui-dialog-buttonpane ui-helper-clearfix">

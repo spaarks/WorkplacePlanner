@@ -1,114 +1,58 @@
 <ft-page-header [title]="'Team Members'"></ft-page-header>
-
 <div class="row">
-  <div class="col-sm-9">
-    <div class="panel">
-      <div class="panel-heading">
-        <h4>Import</h4>
-      </div>
-      <div class="panel-body">
-          <div class="row"  title="Import the Excel file in the following format: Team (optional), Email">
-            <div class="col-sm-5">
-              <input type="text" class="import-textbox"
-                placeholder="Please select Excel file"
-                id="importFileBox" [(ngModel)]="filename">
-            </div>
-            <div class="col-sm-2">
-              <label class="btn btn-primary import-buttons">
-                Browse&hellip;
-                <input type="file" class="hidden" name="importFile" [(ngModel)]="filename">
-              </label>
-            </div>
-            <div class="col-sm-2">
-              <button type="button" class="btn btn-primary import-buttons" [disabled]="filename == ''">
-                Process
-              </button>
-            </div>
-          </div>
-          <div style="margin-top:0.5em;" class="row"  title="Add a person by email">
-            <div class="col-sm-5 col-md-5">
-              <input class="import-textbox" type="email" name="importEmail"
-                placeholder="Please enter an email"
-                [(ngModel)]="email">
-            </div>
-            <div class="col-sm-4 col-md-4">
-              <button type="button" class="btn btn-primary import-buttons" [disabled]="importEmail == ''"
-                  (click)="onAddEmail($event, { email: email })">
-                Add
-              </button>
-            </div>
-          </div>
-      </div>
-    </div>
-  </div>
-  <div class="col-sm-3">
-    <div>
-      <div class="panel panel-default" title="Drag a person here to remove from the lists below">
-          <div class="panel-body"
-              dnd-sortable-container
-              (onDropSuccess)="addedToRecycle($event)"
-              [dropZones]="['members-zone']"
-              [sortableData]="listRecycled">
-              <i class="fa fa-3 fa-recycle"></i>
-              Recycle bin<br/>
-          </div>
-      </div>
-      <div *ngIf="listRecycled.length">
-      <b>Recycled:</b> <span *ngFor="let item of listRecycled">{{item.personDetails}} </span>
+  <div class="col-sm-12">
+    <div class="card">
+      <div class="card-block">
+        <button class="btn btn-primary" (click)="addNewUsers()"> Add New Users </button>
+
+        <div class="pull-right">
+          <ft-team-picker [selectedTeamId]="selectedTeamId" (teamChanged)="teamChanged($event)"></ft-team-picker>
+        </div>
       </div>
     </div>
   </div>
 </div>
-
 <div class="row">
-  <div class="col-sm-6">
-    <div class="panel panel-success">
-      <div class="panel-heading">
-        <h4>Unassigned to teams</h4>
+  <div class="col-sm-5">
+    <div class="card">
+      <div class="card-header">
+        <b>All Users </b>
+        <div class="pull-right"> <input type="text" [(ngModel)]="userFilter"> <i class="fa fa-filter" aria-hidden="true"></i> </div>
       </div>
-      <div class="panel-body"
-           dnd-sortable-container
-           (onDropSuccess)="addedToUnassigned($event)"
-           [dropZones]="['members-zone']"
-           [sortableData]="listUnassigned">
-         <ul class="list-group">
-             <li *ngFor="let item of listUnassigned; let i = index"
-                 class="list-group-item"
-                 dnd-sortable
-                 [sortableIndex]="i">
-                 <i *ngIf="item.roleTypeID > 1" class="fa fa-group"></i>
-               {{item.personDetails}}
-             </li>
-         </ul>
+      <div class="card-block">
+        <ul class="list-group">
+          <li *ngFor="let user of getAllUsers() | ftFilterUsers: userFilter" class="list-group-item">
+            <p-checkbox name="groupname" value="{{user.id}}" [(ngModel)]="usersToAdd"></p-checkbox>
+            {{user.firstName}} {{user.lastName}}
+            <span *ngIf="user.team" class="badge badge-info"> {{user.team.name}} </span>
+          </li>
+        </ul>
       </div>
     </div>
   </div>
-
-  <div class="col-sm-1">
-    <div class="panel panel-info">
+  <div class="col-sm-2 text-center">
+    <div class="btn-group-vertical" style="padding-top:50px;">
+      <button type="button" class="btn btn-outline-primary" (click)="addMembers()"><i class="fa fa-angle-double-right" aria-hidden="true"></i></button>
+      <br />
+      <button type="button" class="btn btn-outline-primary" (click)="removeMembers()"><i class="fa fa-angle-double-left" aria-hidden="true"></i></button>
     </div>
   </div>
   <div class="col-sm-5">
-    <div class="panel panel-info">
-    <div class="panel-heading">
-    <h4>{{teamName}}</h4>
-    </div>
-    <div class="panel-body"
-         dnd-sortable-container
-         (onDragSuccess)="removedFromTeam($event)"
-         (onDropSuccess)="addedToTeam($event)"
-         [dropZones]="['members-zone']"
-         [sortableData]="listTeamMembers">
-      <ul class="list-group">
-          <li *ngFor="let item of listTeamMembers; let i = index"
-              class="list-group-item"
-              dnd-sortable
-              [sortableIndex]="i">
-              <i *ngIf="item.roleTypeID > 1" class="fa fa-group"></i>
-            {{item.personDetails}}
-          </li>
-      </ul>
-    </div>
+    <div class="card">
+      <div class="card-header">
+        <b> Team Members </b>
+      </div>
+      <div class="card-block">
+        <ul class="list-group">
+          <li *ngFor="let member of teamMembers" class="list-group-item">
+            <p-checkbox name="groupname" value="{{member.id}}" [(ngModel)]="membersToRemove"></p-checkbox>
+            {{member.user.firstName}} {{member.user.lastName}} </li>
+        </ul>
+      </div>
     </div>
   </div>
 </div>
+
+<p-dialog header="Add New User" [(visible)]="showAddUsersDialog" width="350" modal="true" dismissableMask="true">
+  <ft-add-user (onUpdated)="userUpdated($event)" [userId]="0"></ft-add-user>
+</p-dialog>

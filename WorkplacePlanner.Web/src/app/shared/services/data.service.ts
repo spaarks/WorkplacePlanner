@@ -1,8 +1,10 @@
 ﻿import { Injectable } from '@angular/core';
 import { Http, Response, Headers } from '@angular/http';
-import { Observable } from 'rxjs/Observable';
+
+import { Observable } from 'rxjs/Rx';
 
 import { AppConfigService } from '../../core/services/app-config.service';
+import { MessageService } from '../../core/services/message.service';
 import { QueryStringParam } from '../models/query-string-param';
 
 @Injectable()
@@ -14,14 +16,15 @@ export class DataService {
         'Accept': 'application/json'
     });
 
-    constructor(private http: Http, private appConfigService: AppConfigService) {
+    constructor(private http: Http, private appConfigService: AppConfigService, private messageService: MessageService) {
         this.apiUrl = this.appConfigService.getApiUrl();
     }
 
     get(controler: string, action: string = '', urlParams?: string[], param?: QueryStringParam[]): Observable<Response> {
         let url = this.createUrl(controler, action, urlParams, param);
-        console.log('Get URL: ' + url);
-        return this.http.get(url);
+        return this.http
+            .get(url)
+            .catch(res => this.handleException(res.json()));
     }
 
     getById(controler: string, action: string = '', id: number): Observable<Response> {
@@ -32,19 +35,21 @@ export class DataService {
         let url = this.createUrl(controler, action);
         return this.http
             .put(url, JSON.stringify(data), { headers: this.headers })
+            .catch(res => this.handleException(res.json()));
     }
 
     updateById(controler: string, action: string, id: number, data?: any): Observable<Response> {
         let url = this.createUrl(controler, action, [id.toString()]);
-        console.log('Update url: ' + url);
         return this.http
             .put(url, JSON.stringify(data), { headers: this.headers })
+            .catch(res => this.handleException(res.json()));
     }
 
     create(controler: string, action: string, data: any): Observable<Response> {
         let url = this.createUrl(controler, action);
         return this.http
             .post(url, JSON.stringify(data), { headers: this.headers })
+            .catch(res => this.handleException(res.json()));
     }
 
     private createUrl(controler: string, action: string, urlParams?: string[], queryStrParams?: QueryStringParam[]): string {
@@ -74,5 +79,10 @@ export class DataService {
 
     private pathCombine(part1: string, part2: string): string {
         return part1 + (part2 != '' ? '/' + part2 : '');
+    }
+
+    private handleException(msg: any) : Observable<Response> {
+        this.messageService.showError(msg.error);
+        return Observable.throw(msg)
     }
 }

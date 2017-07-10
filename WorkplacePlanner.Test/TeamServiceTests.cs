@@ -5,6 +5,7 @@ using System.Linq;
 using WorkplacePlanner.Data;
 using WorkplacePlanner.Data.Entities;
 using WorkplacePlanner.Services;
+using WorkplacePlanner.Utills.CustomExceptions;
 using WorkPlacePlanner.Domain.Dtos.Team;
 using Xunit;
 
@@ -15,12 +16,12 @@ namespace WorkplacePlanner.Test
         public class Create
         {
             [Theory]
-            [InlineData(1, "Team 1", 5, true, true, null)]
-            [InlineData(1, "Team 2", 10, false, true, null)]
-            [InlineData(1, "Team 3", 15, false, true, null)]
-            [InlineData(1, "Team 4", 250, true, false, null)]
-            [InlineData(1, "Team 5", 250, false, false, 3)]
-            public void WhenTeamsExists_PassingCorrectData_CreateSuccessfully(int id, string name, int deskCount, bool active, bool emailNotificationEnabled, int? parentTeamId)
+            [InlineData("Team 1", 5, true, true, null)]
+            [InlineData("Team 2", 10, false, true, null)]
+            [InlineData("Team 3", 15, false, true, null)]
+            [InlineData("Team 4", 250, true, false, null)]
+            [InlineData("Team 5", 250, false, false, 3)]
+            public void WhenTeamsExists_PassingCorrectData_CreateSuccessfully(string name, int deskCount, bool active, bool emailNotificationEnabled, int? parentTeamId)
             {
                 var options = Helper.GetContextOptions();
 
@@ -37,21 +38,21 @@ namespace WorkplacePlanner.Test
                         ParentTeamId = parentTeamId
                     };
 
-                    service.Create(teamDto);
+                    int newTeamId = service.Create(teamDto);
 
-                    var newTeam = service.Get(id);
+                    var newTeam = service.Get(newTeamId);
 
-                    ValidateTeam(newTeam, id, name, deskCount, active, emailNotificationEnabled, parentTeamId, 0);
+                    ValidateTeam(newTeam, newTeamId, name, deskCount, active, emailNotificationEnabled, parentTeamId, 0);
                 }
             }
 
             [Theory]
-            [InlineData(9, "Team 10", 5, true, true, null)]
-            [InlineData(9, "Team 20", 10, false, true, null)]
-            [InlineData(9, "Team 30", 25, false, true, null)]
-            [InlineData(9, "Team 40", 500, true, false, null)]
-            [InlineData(9, "Team 50", 250, false, false, 3)]
-            public void WhenTeamsNotExists_WhenPassingCorrectData_CreateSuccessfully(int id, string name, int deskCount, bool active, bool emailNotificationEnabled, int? parentTeamId)
+            [InlineData("Team 10", 5, true, true, null)]
+            [InlineData("Team 20", 10, false, true, null)]
+            [InlineData("Team 30", 25, false, true, null)]
+            [InlineData("Team 40", 500, true, false, null)]
+            [InlineData("Team 50", 250, false, false, 3)]
+            public void WhenTeamsNotExists_WhenPassingCorrectData_CreateSuccessfully( string name, int deskCount, bool active, bool emailNotificationEnabled, int? parentTeamId)
             {
                 var options = Helper.GetContextOptions();
 
@@ -70,11 +71,11 @@ namespace WorkplacePlanner.Test
                         ParentTeamId = parentTeamId
                     };
 
-                    service.Create(teamDto);
+                    int newTeamId = service.Create(teamDto);
 
-                    var newTeam = service.Get(id);
+                    var newTeam = service.Get(newTeamId);
 
-                    ValidateTeam(newTeam, id, name, deskCount, active, emailNotificationEnabled, parentTeamId, 0);
+                    ValidateTeam(newTeam, newTeamId, name, deskCount, active, emailNotificationEnabled, parentTeamId, 0);
                 }
             }
         }
@@ -95,9 +96,7 @@ namespace WorkplacePlanner.Test
                 {
                     var service = new TeamService(context);
                     service.Delete(id);
-                    var deletedTeam = service.Get(id);
-
-                    Assert.Null(deletedTeam);
+                    Assert.Throws<RecordNotFoundException>(() => service.Get(id));
                 }
             }
 
@@ -156,7 +155,7 @@ namespace WorkplacePlanner.Test
             [InlineData(10)]
             [InlineData(11)]
             [InlineData(12)]
-            public void WhenInvalidIdGiven_ReturnNull(int id)
+            public void WhenInvalidIdGiven_ThrowException(int id)
             {
                 var options = Helper.GetContextOptions();
 
@@ -165,23 +164,19 @@ namespace WorkplacePlanner.Test
                 using (var context = new DataContext(options))
                 {
                     var service = new TeamService(context);
-                    var team = service.Get(id);
-
-                    Assert.Null(team);
+                    Assert.Throws<RecordNotFoundException>(() => service.Get(id));
                 }
             }
 
             [Fact]
-            public void WhenNoDataExists_ReturnNull()
+            public void WhenNoDataExists_ThrowsException()
             {
                 var options = Helper.GetContextOptions();
 
                 using (var context = new DataContext(options))
                 {
                     var service = new TeamService(context);
-                    var team = service.Get(1);
-
-                    Assert.Null(team);
+                    Assert.Throws<RecordNotFoundException>(() => service.Get(1));
                 }
             }
 
@@ -430,7 +425,7 @@ namespace WorkplacePlanner.Test
                 using (var context = new DataContext(options))
                 {
                     var service = CreateTeamService(context);
-                    Assert.Throws<NullReferenceException>(() => service.GetDefaultUsageType(teamId, date));
+                    Assert.Throws<TeamDefaultUsageTypeMissingException>(() => service.GetDefaultUsageType(teamId, date));
                 }
             }
         }
@@ -513,7 +508,7 @@ namespace WorkplacePlanner.Test
                 context.Database.EnsureDeleted();
 
                 context.Teams.AddRange(GetTeams());
-                context.People.AddRange(GetPeople());
+                context.Users.AddRange(GetPeople());
                 context.TeamManagers.AddRange(GetTeamManagers());
                 context.TeamDefaultUsageTypes.AddRange(GetTeamDefaultUsageType());
                 context.GlobalDefaultUsageTypes.AddRange(GetGlobalDefaultUsageType());
@@ -539,9 +534,9 @@ namespace WorkplacePlanner.Test
             return listTeams;
         }
 
-        private static List<Person> GetPeople()
+        private static List<User> GetPeople()
         {
-            var list = new List<Person> {
+            var list = new List<User> {
                 CreatePerson(1, "Alex", "Smith", true, "alex@yopmail.com"),
                 CreatePerson(2, "Glenn", "Maxwell", true, "glen@yopmail.com"),
                 CreatePerson(3, "Adam", "Gilchrist", true, "adam@yopmail.com"),
@@ -638,9 +633,9 @@ namespace WorkplacePlanner.Test
             };
         }
 
-        private static Person CreatePerson(int id, string firstName, string lastName, bool active, string email)
+        private static User CreatePerson(int id, string firstName, string lastName, bool active, string email)
         {
-            return new Person
+            return new User
             {
                 Id = id,
                 FirstName = firstName,

@@ -5,7 +5,7 @@ using WorkplacePlanner.Data;
 using WorkplacePlanner.Data.Entities;
 using WorkplacePlanner.Utills.CustomExceptions;
 using WorkPlacePlanner.Domain.Dtos.Calendar;
-using WorkPlacePlanner.Domain.Dtos.Person;
+using WorkPlacePlanner.Domain.Dtos.User;
 using WorkPlacePlanner.Domain.Services;
 
 namespace WorkplacePlanner.Services
@@ -34,16 +34,16 @@ namespace WorkplacePlanner.Services
                         .Where(m => m.TeamId == teamId
                             && m.StartDate <= endDate  
                             && (m.EndDate == null || m.EndDate >= startDate))
-                        .OrderBy(m => m.Person.FirstName)
-                        .ThenBy(m => m.Person.LastName)
+                        .OrderBy(m => m.User.FirstName)
+                        .ThenBy(m => m.User.LastName)
                         .Select(m => new CalendarRawDto
                         {
-                            Person = new PersonDto
+                            User = new UserDto
                             {
-                                Id = m.Person.Id,
-                                FirstName = m.Person.FirstName,
-                                LastName = m.Person.LastName,
-                                Email = m.Person.Email
+                                Id = m.User.Id,
+                                FirstName = m.User.FirstName,
+                                LastName = m.User.LastName,
+                                Email = m.User.Email
                             },
                             CalendarEntries = m.CalendarEntries
                             .Where(e => e.Date >= startDate && e.Date <= endDate)

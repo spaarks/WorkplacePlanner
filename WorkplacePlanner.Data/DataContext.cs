@@ -14,7 +14,7 @@ namespace WorkplacePlanner.Data
             
         }
 
-        public DbSet<Person> People { get; set; }
+        public DbSet<User> Users { get; set; }
 
         public DbSet<Team> Teams { get; set; }
 
@@ -44,6 +44,10 @@ namespace WorkplacePlanner.Data
 
             builder.Entity<Setting>()
                     .HasIndex(t => t.Name)
+                    .IsUnique();
+
+            builder.Entity<User>()
+                    .HasIndex(u => u.Email)
                     .IsUnique();
         }
 

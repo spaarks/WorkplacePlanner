@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using WorkplacePlanner.Data;
 using WorkPlacePlanner.Domain.Services;
 using WorkplacePlanner.Services;
+using WorkplacePlanner.Utills.ErrorHandling;
 
 namespace WorkplacePlanner.WebApi
 {
@@ -40,7 +41,8 @@ namespace WorkplacePlanner.WebApi
             services.AddScoped<ISettingsService, SettingsService>();
             services.AddScoped<ITeamService, TeamService>();
             services.AddScoped<ICalendarService, CalendarService>();
-            services.AddScoped<IPersonService, PersonService>();            
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IMembershipService, MembershipService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -49,13 +51,12 @@ namespace WorkplacePlanner.WebApi
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
+            //Accept All HTTP Request Methods from all origins
             app.UseCors(builder => builder.WithOrigins("http://localhost:4200")
                                         .AllowAnyHeader().AllowAnyMethod());
 
-            //Accept All HTTP Request Methods from all origins
-            //app.UseCors(builder =>
-            //    builder.AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod());
-
+            app.UseMiddleware(typeof(ErrorHandlingMiddleware));
+            //app.UseMiddleware(typeof(ErrorLoggingMiddleware));
             app.UseMvc();
 
             //This will populate some test data automatically that will help in early stages of development. Remove this once the product is stable.

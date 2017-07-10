@@ -5,7 +5,7 @@ using System.Text;
 using WorkplacePlanner.Data;
 using WorkplacePlanner.Data.Entities;
 using WorkplacePlanner.Utills.CustomExceptions;
-using WorkPlacePlanner.Domain.Dtos.Person;
+using WorkPlacePlanner.Domain.Dtos.User;
 using WorkPlacePlanner.Domain.Dtos.Team;
 using WorkPlacePlanner.Domain.Services;
 
@@ -20,7 +20,7 @@ namespace WorkplacePlanner.Services
             _dataContext = context;
         }
 
-        public void Create(TeamDto data)
+        public int Create(TeamDto data)
         {
             var team = new Team()
             {
@@ -33,6 +33,8 @@ namespace WorkplacePlanner.Services
 
             _dataContext.Teams.Add(team);
             _dataContext.SaveChanges();
+
+            return team.Id;
         }
 
         public void Delete(int id)
@@ -56,14 +58,17 @@ namespace WorkplacePlanner.Services
                         Managers = t.Managers
                                     .Where(m => m.StartDate <= DateTime.Now
                                             && (m.EndDate == null || m.EndDate >= DateTime.Now))
-                                    .Select(m => new PersonDto
+                                    .Select(m => new UserDto
                                     {
-                                        Id = m.Person.Id,
-                                        FirstName = m.Person.FirstName,
-                                        LastName = m.Person.LastName,
-                                        Email = m.Person.Email
-                                    }).ToArray()                                         
+                                        Id = m.User.Id,
+                                        FirstName = m.User.FirstName,
+                                        LastName = m.User.LastName,
+                                        Email = m.User.Email
+                                    }).ToArray()
                     }).FirstOrDefault();
+
+            if (team == null)
+                throw new RecordNotFoundException("Team", id);
 
             return team;
         }
@@ -83,12 +88,12 @@ namespace WorkplacePlanner.Services
                        Managers = t.Managers
                                     .Where(m => m.StartDate <= DateTime.Now
                                             && (m.EndDate == null || m.EndDate >= DateTime.Now))
-                                    .Select(m => new PersonDto
+                                    .Select(m => new UserDto
                                     {
-                                        Id = m.Person.Id,
-                                        FirstName = m.Person.FirstName,
-                                        LastName = m.Person.LastName,
-                                        Email = m.Person.Email
+                                        Id = m.User.Id,
+                                        FirstName = m.User.FirstName,
+                                        LastName = m.User.LastName,
+                                        Email = m.User.Email
                                     }).ToArray()
                    }).ToList();
 
@@ -126,12 +131,12 @@ namespace WorkplacePlanner.Services
                      Managers = st.Managers
                                     .Where(m => m.StartDate <= DateTime.Now
                                             && (m.EndDate == null || m.EndDate >= DateTime.Now))
-                                    .Select(m => new PersonDto
+                                    .Select(m => new UserDto
                                     {
-                                        Id = m.Person.Id,
-                                        FirstName = m.Person.FirstName,
-                                        LastName = m.Person.LastName,
-                                        Email = m.Person.Email
+                                        Id = m.User.Id,
+                                        FirstName = m.User.FirstName,
+                                        LastName = m.User.LastName,
+                                        Email = m.User.Email
                                     }).ToArray()
                  }).ToList();
 

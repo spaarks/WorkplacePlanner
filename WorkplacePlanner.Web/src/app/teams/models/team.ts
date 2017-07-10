@@ -1,11 +1,11 @@
-import { Person } from './person'
+import { User } from '../../users/models/user'
 
 export class Team {
     id: number;
     name: string;
     deskCount: number;
     emailNotificationEnabled : boolean;
-    managers: Person[];
+    managers: User[];
     parentTeamId: number;
     active: boolean;
 }

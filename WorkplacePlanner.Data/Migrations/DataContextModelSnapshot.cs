@@ -95,38 +95,6 @@ namespace WorkplacePlanner.Data.Migrations
                     b.ToTable("Holidays");
                 });
 
-            modelBuilder.Entity("WorkplacePlanner.Data.Entities.Person", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<bool>("Active");
-
-                    b.Property<int>("CreatedBy");
-
-                    b.Property<DateTime>("CreatedDate");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(200);
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasMaxLength(50);
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasMaxLength(50);
-
-                    b.Property<int>("LastUpdatedBy");
-
-                    b.Property<DateTime>("LastUpdatedDate");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("People");
-                });
-
             modelBuilder.Entity("WorkplacePlanner.Data.Entities.Setting", b =>
                 {
                     b.Property<int>("Id")
@@ -315,6 +283,41 @@ namespace WorkplacePlanner.Data.Migrations
                     b.ToTable("UsageTypes");
                 });
 
+            modelBuilder.Entity("WorkplacePlanner.Data.Entities.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<bool>("Active");
+
+                    b.Property<int>("CreatedBy");
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(200);
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(50);
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(50);
+
+                    b.Property<int>("LastUpdatedBy");
+
+                    b.Property<DateTime>("LastUpdatedDate");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.ToTable("Users");
+                });
+
             modelBuilder.Entity("WorkplacePlanner.Data.Entities.CalendarEntry", b =>
                 {
                     b.HasOne("WorkplacePlanner.Data.Entities.TeamMembership", "TeamMembership")
@@ -358,7 +361,7 @@ namespace WorkplacePlanner.Data.Migrations
 
             modelBuilder.Entity("WorkplacePlanner.Data.Entities.TeamManager", b =>
                 {
-                    b.HasOne("WorkplacePlanner.Data.Entities.Person", "Person")
+                    b.HasOne("WorkplacePlanner.Data.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("PersonId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -371,8 +374,8 @@ namespace WorkplacePlanner.Data.Migrations
 
             modelBuilder.Entity("WorkplacePlanner.Data.Entities.TeamMembership", b =>
                 {
-                    b.HasOne("WorkplacePlanner.Data.Entities.Person", "Person")
-                        .WithMany()
+                    b.HasOne("WorkplacePlanner.Data.Entities.User", "User")
+                        .WithMany("TeamMemberships")
                         .HasForeignKey("PersonId")
                         .OnDelete(DeleteBehavior.Cascade);
 

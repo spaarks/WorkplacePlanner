@@ -7,7 +7,7 @@ namespace WorkPlacePlanner.Domain.Services
 {
     public interface ITeamService
     {
-        void Create(TeamDto data);
+        int Create(TeamDto data);
 
         void Delete(int id);
 

@@ -53,9 +53,10 @@ namespace WorkplacePlanner.WebApi.Controllers
         
         // POST: api/Teams
         [HttpPost]
-        public void Post([FromBody]TeamDto data)
+        public int Post([FromBody]TeamDto data)
         {
-            _teamService.Create(data);
+            var teamId = _teamService.Create(data);
+            return teamId;
         }
         
         // PUT: api/Teams

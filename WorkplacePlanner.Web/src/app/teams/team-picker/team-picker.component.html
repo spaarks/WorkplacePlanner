@@ -1,5 +1,5 @@
 <p-dropdown [options]="selectItems" [(ngModel)]="selectedTeam" [style]="{'width':'150px'}" (onChange)="selectionChanged($event)" [filter]="true"
-    class="team-picker" [dataKey]="data">
+    class="team-picker">
     <ng-template let-team pTemplate="item">
         <div class="ui-helper-clearfix team-picker-template" ft-indent-tree-table [level]="team.value.level"
             [padding]="10">            

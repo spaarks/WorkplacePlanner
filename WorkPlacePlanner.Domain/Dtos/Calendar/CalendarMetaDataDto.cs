@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using WorkPlacePlanner.Domain.Dtos.Person;
+using WorkPlacePlanner.Domain.Dtos.User;
 
 namespace WorkPlacePlanner.Domain.Dtos.Calendar
 {
@@ -9,6 +9,6 @@ namespace WorkPlacePlanner.Domain.Dtos.Calendar
     {
         public List<UsageTypeDto> UsageTypes { get; set; }
 
-        public List<PersonDto> TeamManagers { get; set; }
+        public List<UserDto> TeamManagers { get; set; }
     }
 }

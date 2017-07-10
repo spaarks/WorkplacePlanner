@@ -4,7 +4,7 @@ import 'rxjs/add/operator/toPromise';
 
 import { Team } from '../models/team';
 import { TeamXs } from '../models/team-xs';
-import { Person } from '../models/person'
+import { User } from '../../users/models/user'
 import { DataService } from '../../shared/services/data.service';
 import { TreeNode } from 'primeng/components/common/api';
 import { TreeTableNode } from '../../shared/models/tree-table-node';
@@ -13,13 +13,12 @@ import { TreeTableNode } from '../../shared/models/tree-table-node';
 export class TeamService {
     constructor(private dataService: DataService) { }
 
-    public create(team: Team): Promise<Team> {
+    public create(team: Team): Promise<number> {
         return this.dataService.create('teams', '', team)
             .toPromise()
-            .then(() => team);
+            .then(res => res.json() as number);
     }
 
-    //TODO: This is just for testing purposes. Move this to appropriate module.
     public get(id: number): Promise<Team> {
         console.log(id);
         return this.dataService.getById('teams', '', id)

@@ -10,18 +10,23 @@ import { DialogModule } from 'primeng/components/dialog/dialog';
 //In-memory data service for initial phase of development and mockup
 import { InMemoryWebApiModule } from 'angular-in-memory-web-api';
 import { InMemoryDataService } from './services/in-memory-data.service';
+import { DataListModule, CheckboxModule } from 'primeng/primeng';
+
 
 import { PageHeaderComponent } from './page-header/page-header.component'; 
 import { NoDataTemplateComponent } from './no-data-template/no-data-template.component';
 import { DataService } from './services/data.service';
+import { HelperService } from './services/helper.service';
 import { MonthPickerComponent } from './month-picker/month-picker.component';
 import { YearPickerComponent } from './year-picker/year-picker.component';
 
 @NgModule({
     imports: [
         //BrowserModule,
+        CheckboxModule,
         CommonModule,
         DatepickerModule,
+        DataListModule,
         DialogModule,       
         FormsModule,
         HttpModule,
@@ -36,11 +41,14 @@ import { YearPickerComponent } from './year-picker/year-picker.component';
         YearPickerComponent
     ],
     providers: [
-        DataService
+        DataService,
+        HelperService
     ],
     exports: [
         //BrowserModule,
+        CheckboxModule,
         CommonModule,
+        DataListModule,
         DatepickerModule,
         DialogModule,
         FormsModule,

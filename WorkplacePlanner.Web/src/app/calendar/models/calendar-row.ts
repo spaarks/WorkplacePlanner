@@ -1,8 +1,8 @@
-import { Person } from '../../teams/models/person'
+import { User } from '../../users/models/user'
 import { CalendarEntry } from './calendar-entry'
 
 export class CalendarRow {
-    person: Person;
+    user: User;
     calendarEntries: CalendarEntry[];
     hasPermissionToEdit: boolean;
     membershipId: number;

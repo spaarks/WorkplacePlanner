@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using WorkPlacePlanner.Domain.Dtos.Person;
+using WorkPlacePlanner.Domain.Dtos.User;
 
 namespace WorkPlacePlanner.Domain.Dtos.Calendar
 {
     public class CalendarRawDto
     {
-        public PersonDto Person { get; set; }
+        public UserDto User { get; set; }
 
         public List<CalendarEntryDto> CalendarEntries { get; set; }
         

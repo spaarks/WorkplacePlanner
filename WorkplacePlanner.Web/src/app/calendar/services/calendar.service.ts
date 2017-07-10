@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import 'rxjs/add/operator/toPromise';
 
 import { DataService } from '../../shared/services/data.service';
+import { HelperService } from '../../shared/services/helper.service';
 import { CalendarRow } from '../models/calendar-row';
 import { CalendarEntry } from '../models/calendar-entry';
 import { UsageType } from '../models/usage-type';
@@ -12,16 +13,16 @@ import { CalendarUpdateDto } from '../models/calendar-update-dto';
 @Injectable()
 export class CalendarService {
 
-    constructor(private dataService: DataService) { }
+    constructor(private dataService: DataService, private helperService: HelperService) { }
 
     getCalendar(teamId: number, month: Date): Promise<CalendarRow[]> {
-        return this.dataService.get("calendar", '', [teamId.toString(), this.formatDate(month)])
+        return this.dataService.get("calendar", '', [teamId.toString(), this.helperService.formatDate(month)])
             .toPromise()
             .then(response => response.json() as CalendarRow[]);
     }
 
     getCalenderEntries(teamMembershipId: number, month: Date): Promise<CalendarEntry[]> {
-        return this.dataService.get('calendar', 'entries', [teamMembershipId.toString(), this.formatDate(month)])
+        return this.dataService.get('calendar', 'entries', [teamMembershipId.toString(), this.helperService.formatDate(month)])
             .toPromise()
             .then(response => response.json() as CalendarEntry[]);
     }
@@ -44,17 +45,5 @@ export class CalendarService {
     updateCalendar(data: CalendarUpdateDto): Promise<any> {
         return this.dataService.update('calendar', '', data)
             .toPromise();
-    }
-
-    private formatDate(date): string {
-        var d = new Date(date),
-            month = '' + (d.getMonth() + 1),
-            day = '' + d.getDate(),
-            year = d.getFullYear();
-
-        if (month.length < 2) month = '0' + month;
-        if (day.length < 2) day = '0' + day;
-
-        return [year, month, day].join('-');
     }
 }
