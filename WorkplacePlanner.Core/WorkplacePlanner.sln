@@ -3,27 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26430.13
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "WorkplacePlanner.Web", "WorkplacePlanner.Web\", "{9B124D2F-49D8-48D5-AED9-C8C58FF01961}"
-	ProjectSection(WebsiteProperties) = preProject
-		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
-		Debug.AspNetCompiler.VirtualPath = "/localhost_1859"
-		Debug.AspNetCompiler.PhysicalPath = "WorkplacePlanner.Web\"
-		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_1859\"
-		Debug.AspNetCompiler.Updateable = "true"
-		Debug.AspNetCompiler.ForceOverwrite = "true"
-		Debug.AspNetCompiler.FixedNames = "false"
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.VirtualPath = "/localhost_1859"
-		Release.AspNetCompiler.PhysicalPath = "WorkplacePlanner.Web\"
-		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_1859\"
-		Release.AspNetCompiler.Updateable = "true"
-		Release.AspNetCompiler.ForceOverwrite = "true"
-		Release.AspNetCompiler.FixedNames = "false"
-		Release.AspNetCompiler.Debug = "False"
-		VWDPort = "1859"
-		SlnRelativePath = "WorkplacePlanner.Web\"
-	EndProjectSection
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkplacePlanner.Data", "WorkplacePlanner.Data\WorkplacePlanner.Data.csproj", "{84AE256C-AFF7-4864-8BAC-85A75FAC3B67}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkPlacePlanner.Domain", "WorkPlacePlanner.Domain\WorkPlacePlanner.Domain.csproj", "{042D13FD-B7AE-4C17-967A-C04257D24962}"

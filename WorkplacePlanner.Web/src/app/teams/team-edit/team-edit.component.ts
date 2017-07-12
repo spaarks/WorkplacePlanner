@@ -7,9 +7,9 @@ import { TeamService } from '../services/team.service';
 import { MessageService } from '../../core/services/message.service';
 
 @Component({
-    //moduleId: module.id,
+    moduleId: module.id,
     selector: 'ft-edit-team',
-    templateUrl: './team-edit.component.html'
+    templateUrl: 'team-edit.component.html'
 })
 
 export class TeamEditComponent implements OnInit {

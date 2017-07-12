@@ -12,6 +12,8 @@ using WorkplacePlanner.Data;
 using WorkPlacePlanner.Domain.Services;
 using WorkplacePlanner.Services;
 using WorkplacePlanner.Utills.ErrorHandling;
+using WorkplacePlanner.Utills.ConfigSettings;
+using Microsoft.Extensions.Options;
 
 namespace WorkplacePlanner.WebApi
 {
@@ -43,16 +45,22 @@ namespace WorkplacePlanner.WebApi
             services.AddScoped<ICalendarService, CalendarService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IMembershipService, MembershipService>();
+
+            services.Configure<CorsSettings>(Configuration.GetSection("CorsSettings"));
+
+            //services.AddOptions();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, DataContext context)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, DataContext context, IOptions<CorsSettings> corsSettings)
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
+            var corsSett = corsSettings.Value;
+
             //Accept All HTTP Request Methods from all origins
-            app.UseCors(builder => builder.WithOrigins("http://localhost:4200")
+            app.UseCors(builder => builder.WithOrigins(corsSett.AllowedOrigins)
                                         .AllowAnyHeader().AllowAnyMethod());
 
             app.UseMiddleware(typeof(ErrorHandlingMiddleware));

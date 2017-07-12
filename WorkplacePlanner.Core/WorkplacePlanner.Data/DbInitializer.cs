@@ -10,7 +10,7 @@ namespace WorkplacePlanner.Data
     {
         public static void Initialize(DataContext context)
         {
-            context.Database.EnsureDeleted();
+            //context.Database.EnsureDeleted();
             //context.Database.EnsureCreated();
             context.EnsureUptoDate();
 
