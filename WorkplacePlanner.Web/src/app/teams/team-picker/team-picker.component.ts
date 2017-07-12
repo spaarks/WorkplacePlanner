@@ -48,7 +48,7 @@ export class TeamPickerComponent {
         return { level: 0, hasChildren: false, data: null, expanded: true };
     }
 
-    selectionChanged(x, y): void {
+    selectionChanged(x): void {
         if (this.selectedTeam.data != null) {
             this.teamChanged.emit(this.selectedTeam.data.id);
         } else {
