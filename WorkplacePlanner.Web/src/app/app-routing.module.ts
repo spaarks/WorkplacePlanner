@@ -3,6 +3,8 @@ import { Routes, RouterModule } from '@angular/router';
 
 // Layouts
 import { FullLayoutComponent } from './layouts/full-layout.component';
+import { EmptyLayoutComponent } from './layouts/empty-layout.component';
+import { AuthGuard } from './guards/auth.guard'
 
 export const routes: Routes = [
   {
@@ -20,7 +22,6 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         loadChildren: './calendar/calendar.module#CalendarModule'
-        
       },
       {
         path: 'teams',
@@ -37,12 +38,27 @@ export const routes: Routes = [
         path: 'reports',
         loadChildren: './reports/reports.module#ReportsModule'
       }
+    ],
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'account',
+    component: EmptyLayoutComponent,
+    data: {
+      title: 'Account'
+    },
+    children: [
+      {
+        path: '',
+        loadChildren: './account/account.module#AccountModule'
+      }
     ]
   }
 ];
 
 @NgModule({
-  imports: [ RouterModule.forRoot(routes) ],
-  exports: [ RouterModule ]
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule],
+  providers: [AuthGuard]
 })
-export class AppRoutingModule {}
+export class AppRoutingModule { }

@@ -35,7 +35,7 @@ namespace WorkplacePlanner.Test
                         Active = active
                     };
 
-                    int id = service.Create(newPerson);
+                    int id = service.CreateUserData(newPerson);
 
                     var person = service.Get(id);
 
@@ -65,7 +65,7 @@ namespace WorkplacePlanner.Test
                         Active = active
                     };
 
-                    int id = service.Create(newPerson);
+                    int id = service.CreateUserData(newPerson);
 
                     var person = service.Get(id);
 
@@ -254,40 +254,72 @@ namespace WorkplacePlanner.Test
             using (var context = new DataContext(options))
             {
                 context.Database.EnsureDeleted();
-                
+
                 context.Users.AddRange(GetUsers());
+                context.UserData.AddRange(GetUserData());
 
                 context.SaveChanges();
             }
         }
 
-        private static List<User> GetUsers()
+        private static List<UserData> GetUserData()
         {
-            var list = new List<User> {
-                CreateUser(1, "Alex", "Smith", true, "alex@yopmail.com"),
-                CreateUser(2, "Glenn", "Maxwell", true, "glen@yopmail.com"),
-                CreateUser(3, "Adam", "Gilchrist", true, "adam@yopmail.com"),
-                CreateUser(4, "Steve", "Smith", true, "steve@yopmail.com"),
-                CreateUser(5, "Mike", "Pence", true, "mike@yopmail.com"),
-                CreateUser(6, "Yash", "Varma", true, "yash@yopmail.com"),
-                CreateUser(7, "Andrew", "Flintop", false, "andrew@yopmail.com"),
-                CreateUser(8, "Ben", "Stoke", true, "ben@yopmail.com"),
-                CreateUser(9, "Lionel", "Messi", true, "lionel@yopmail.com"),
-                CreateUser(10, "Leo", "Tolstoy", true, "leo@yopmail.com"),
-                CreateUser(100, "Sauron", "Manager", true, "Sauron@yopmail.com"),
-                CreateUser(101, "Prodo", "Manager", true, "Prodo@yopmail.com"),
-                CreateUser(102, "Bilbo", "Manager", false, "Bilbo@yopmail.com"),
-                CreateUser(103, "Piping", "Manager", true, "Piping@yopmail.com")
+            var list = new List<UserData> {
+                CreateUserData(1, 1, "Alex", "Smith", true, "alex@yopmail.com"),
+                CreateUserData(2, 2, "Glenn", "Maxwell", true, "glen@yopmail.com"),
+                CreateUserData(3, 3, "Adam", "Gilchrist", true, "adam@yopmail.com"),
+                CreateUserData(4, 4, "Steve", "Smith", true, "steve@yopmail.com"),
+                CreateUserData(5, 5, "Mike", "Pence", true, "mike@yopmail.com"),
+                CreateUserData(6, 6, "Yash", "Varma", true, "yash@yopmail.com"),
+                CreateUserData(7, 7, "Andrew", "Flintop", false, "andrew@yopmail.com"),
+                CreateUserData(8, 8, "Ben", "Stoke", true, "ben@yopmail.com"),
+                CreateUserData(9, 9, "Lionel", "Messi", true, "lionel@yopmail.com"),
+                CreateUserData(10, 10, "Leo", "Tolstoy", true, "leo@yopmail.com"),
+                CreateUserData(100, 11, "Sauron", "Manager", true, "Sauron@yopmail.com"),
+                CreateUserData(101, 12, "Prodo", "Manager", true, "Prodo@yopmail.com"),
+                CreateUserData(102, 13, "Bilbo", "Manager", false, "Bilbo@yopmail.com"),
+                CreateUserData(103, 14, "Piping", "Manager", true, "Piping@yopmail.com")
             };
 
             return list;
         }
 
-        private static User CreateUser(int id, string firstName, string lastName, bool active, string email)
+        private static ApplicationUser[] GetUsers()
         {
-            return new User
+            var list = new ApplicationUser[] {
+                CreatUser(1, "alex@yopmail.com"),
+                CreatUser(2, "glen@yopmail.com"),
+                CreatUser(3, "adam@yopmail.com"),
+                CreatUser(4, "steve@yopmail.com"),
+                CreatUser(5, "mike@yopmail.com"),
+                CreatUser(6, "yash@yopmail.com"),
+                CreatUser(7, "andrew@yopmail.com"),
+                CreatUser(8, "ben@yopmail.com"),
+                CreatUser(9, "lionel@yopmail.com"),
+                CreatUser(10, "leo@yopmail.com"),
+                CreatUser(11, "Sauron@yopmail.com"),
+                CreatUser(12, "Prodo@yopmail.com"),
+                CreatUser(13, "Bilbo@yopmail.com"),
+                CreatUser(14, "Piping@yopmail.com")
+            };
+
+            return list;
+        }
+
+        private static ApplicationUser CreatUser(int id, string email)
+        {
+            return new ApplicationUser
+            {
+                Email = email
+            };
+        }
+
+        private static UserData CreateUserData(int id, int userId, string firstName, string lastName, bool active, string email)
+        {
+            return new UserData
             {
                 //Id = id,
+                UserId = userId,
                 FirstName = firstName,
                 LastName = lastName,
                 Active = active,

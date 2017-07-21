@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,7 @@ namespace WorkplacePlanner.Data
 {
     public static class DbInitializer
     {
-        public static void Initialize(DataContext context)
+        public async static void Initialize(DataContext context, UserManager<ApplicationUser> userManager)
         {
             //context.Database.EnsureDeleted();
             //context.Database.EnsureCreated();
@@ -17,22 +18,28 @@ namespace WorkplacePlanner.Data
             if (context.Users.Any())
                 return;
 
-            var people = new User[]
-                {
-                    new User { FirstName = "Mitch", LastName="Marsh", Email="mitch@yupmail.com", Active=true},
-                    new User { FirstName = "John", LastName="Smith", Email="john@yupmail.com", Active=true},
-                    new User { FirstName = "Mike", LastName="Pell", Email="mike@yupmail.com", Active=true},
-                    new User { FirstName = "Alex", LastName="Bevan", Email="alex@yupmail.com", Active=true},
-                    new User { FirstName = "David", LastName="Hussey", Email="david@yupmail.com", Active=true},
-                    new User { FirstName = "Adam", LastName="Marsh", Email="adam@yupmail.com", Active=true},
-                    new User { FirstName = "Yash", LastName="Varma", Email="yash@yupmail.com", Active=true},
-                    new User { FirstName = "Ravi", LastName="Weera", Email="ravi@yupmail.com", Active=true},
-                    new User { FirstName = "Sachin", LastName="Smith", Email="sachin@yupmail.com", Active=true},
-                    new User { FirstName = "Virat", LastName="Kohli", Email="virat@yupmail.com", Active=true}
-                };
+            var adminUser = new ApplicationUser { Email = "superadmin@yopmail.com", UserName = "superadmin@yopmail.com" };
+            var result = await userManager.CreateAsync(adminUser, "Pwd123");
 
-            context.Users.AddRange(people);
-            context.SaveChanges();
+            if (result.Succeeded)
+            {
+                var people = new UserData[]
+                    {
+                    new UserData { UserId=adminUser.Id, FirstName = "Super", LastName="Admin", Email="superadmin@yopmail.com", Active=true}
+                    //new UserData { FirstName = "John", LastName="Smith", Email="john@yupmail.com", Active=true},
+                    //new UserData { FirstName = "Mike", LastName="Pell", Email="mike@yupmail.com", Active=true},
+                    //new UserData { FirstName = "Alex", LastName="Bevan", Email="alex@yupmail.com", Active=true},
+                    //new UserData { FirstName = "David", LastName="Hussey", Email="david@yupmail.com", Active=true},
+                    //new UserData { FirstName = "Adam", LastName="Marsh", Email="adam@yupmail.com", Active=true},
+                    //new UserData { FirstName = "Yash", LastName="Varma", Email="yash@yupmail.com", Active=true},
+                    //new UserData { FirstName = "Ravi", LastName="Weera", Email="ravi@yupmail.com", Active=true},
+                    //new UserData { FirstName = "Sachin", LastName="Smith", Email="sachin@yupmail.com", Active=true},
+                    //new UserData { FirstName = "Virat", LastName="Kohli", Email="virat@yupmail.com", Active=true}
+                    };
+
+                context.UserData.AddRange(people);
+                context.SaveChanges();
+            }
 
             var teams = new Team[]
                 {
@@ -49,31 +56,31 @@ namespace WorkplacePlanner.Data
 
             var teamManagers = new TeamManager[]
                 {
-                    new TeamManager{ TeamId = 1, PersonId = 1, StartDate = new DateTime(2017, 6, 1)},
-                    new TeamManager{ TeamId = 2, PersonId = 2, StartDate = new DateTime(2017, 6, 1)},
-                    new TeamManager{ TeamId = 3, PersonId = 3, StartDate = new DateTime(2017, 6, 1)},
-                    new TeamManager{ TeamId = 4, PersonId = 4, StartDate = new DateTime(2017, 6, 1)}
+                    new TeamManager{ TeamId = 1, UserId = 1, StartDate = new DateTime(2017, 6, 1)},
+                    new TeamManager{ TeamId = 2, UserId = 2, StartDate = new DateTime(2017, 6, 1)},
+                    new TeamManager{ TeamId = 3, UserId = 3, StartDate = new DateTime(2017, 6, 1)},
+                    new TeamManager{ TeamId = 4, UserId = 4, StartDate = new DateTime(2017, 6, 1)}
                 };
 
-            context.TeamManagers.AddRange(teamManagers);
-            context.SaveChanges();
+            //context.TeamManagers.AddRange(teamManagers);
+            //context.SaveChanges();
 
             var teamMemberships = new TeamMembership[]
                    {
-                            new TeamMembership{ TeamId = 1, PersonId = 1, StartDate = new DateTime(2017, 6, 1)},
-                            new TeamMembership{ TeamId = 1, PersonId = 2, StartDate = new DateTime(2017, 6, 1)},
-                            new TeamMembership{ TeamId = 2, PersonId = 3, StartDate = new DateTime(2017, 6, 1)},
-                            new TeamMembership{ TeamId = 2, PersonId = 4, StartDate = new DateTime(2017, 6, 1)},
-                            new TeamMembership{ TeamId = 3, PersonId = 5, StartDate = new DateTime(2017, 6, 1)},
-                            new TeamMembership{ TeamId = 3, PersonId = 6, StartDate = new DateTime(2017, 6, 1)},
-                            new TeamMembership{ TeamId = 3, PersonId = 7, StartDate = new DateTime(2017, 6, 1)},
-                            new TeamMembership{ TeamId = 1, PersonId = 8, StartDate = new DateTime(2017, 6, 1)},
-                            new TeamMembership{ TeamId = 1, PersonId = 9, StartDate = new DateTime(2017, 6, 1)},
-                            new TeamMembership{ TeamId = 1, PersonId = 10, StartDate = new DateTime(2017, 6, 1)},
+                            new TeamMembership{ TeamId = 1, UserId = 1, StartDate = new DateTime(2017, 6, 1)},
+                            new TeamMembership{ TeamId = 1, UserId = 2, StartDate = new DateTime(2017, 6, 1)},
+                            new TeamMembership{ TeamId = 2, UserId = 3, StartDate = new DateTime(2017, 6, 1)},
+                            new TeamMembership{ TeamId = 2, UserId = 4, StartDate = new DateTime(2017, 6, 1)},
+                            new TeamMembership{ TeamId = 3, UserId = 5, StartDate = new DateTime(2017, 6, 1)},
+                            new TeamMembership{ TeamId = 3, UserId = 6, StartDate = new DateTime(2017, 6, 1)},
+                            new TeamMembership{ TeamId = 3, UserId = 7, StartDate = new DateTime(2017, 6, 1)},
+                            new TeamMembership{ TeamId = 1, UserId = 8, StartDate = new DateTime(2017, 6, 1)},
+                            new TeamMembership{ TeamId = 1, UserId = 9, StartDate = new DateTime(2017, 6, 1)},
+                            new TeamMembership{ TeamId = 1, UserId = 10, StartDate = new DateTime(2017, 6, 1)},
                    };
 
-            context.TeamMemberships.AddRange(teamMemberships);
-            context.SaveChanges();
+            //context.TeamMemberships.AddRange(teamMemberships);
+            //context.SaveChanges();
 
             var usageTypes = new UsageType[]
                 {
@@ -106,8 +113,8 @@ namespace WorkplacePlanner.Data
                     new CalendarEntry{ TeamMembershipId=10, UsageTypeId=2, Date= new DateTime(2017, 6, 23), Comments="Test data" }
                 };
 
-            context.CalendarEntries.AddRange(calendarEntries);
-            context.SaveChanges();
+            //context.CalendarEntries.AddRange(calendarEntries);
+            //context.SaveChanges();
 
             var settings = new Setting[] {
                 new Setting { Name = "WorkingWeekDays", Value = "1,2,3,4,5" },

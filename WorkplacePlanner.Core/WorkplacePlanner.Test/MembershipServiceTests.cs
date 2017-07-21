@@ -236,7 +236,7 @@ namespace WorkplacePlanner.Test
                 context.Database.EnsureDeleted();
 
                 context.Teams.AddRange(GetTeams());
-                context.Users.AddRange(GetPeople());
+                context.UserData.AddRange(GetPeople());
                 context.TeamMemberships.AddRange(GetMemberships());
 
                 context.SaveChanges();
@@ -255,9 +255,9 @@ namespace WorkplacePlanner.Test
             return list;
         }
 
-        private static List<User> GetPeople()
+        private static List<UserData> GetPeople()
         {
-            var list = new List<User> {
+            var list = new List<UserData> {
                 CreatePerson(1, "Alex", "Smith", true, "alex@yopmail.com"),
                 CreatePerson(2, "Glenn", "Maxwell", true, "glen@yopmail.com"),
                 CreatePerson(3, "Adam", "Gilchrist", true, "adam@yopmail.com"),
@@ -312,9 +312,9 @@ namespace WorkplacePlanner.Test
             };
         }
 
-        private static User CreatePerson(int id, string firstName, string lastName, bool active, string email)
+        private static UserData CreatePerson(int id, string firstName, string lastName, bool active, string email)
         {
-            return new User
+            return new UserData
             {
                 Id = id,
                 FirstName = firstName,
@@ -330,7 +330,7 @@ namespace WorkplacePlanner.Test
             {
                 //Id = id,
                 TeamId = teamId,
-                PersonId = personId,
+                UserId = personId,
                 StartDate = startDate,
                 EndDate = endDate,
             };

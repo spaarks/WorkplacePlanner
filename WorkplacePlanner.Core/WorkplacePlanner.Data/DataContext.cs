@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,14 +8,13 @@ using WorkplacePlanner.Data.Entities;
 
 namespace WorkplacePlanner.Data
 {
-    public class DataContext : DbContext
+    public class DataContext : IdentityDbContext<ApplicationUser, IdentityRole<int>, int>
     {
         public DataContext(DbContextOptions<DataContext> options) : base(options)
         {
-            
         }
-
-        public DbSet<User> Users { get; set; }
+        
+        public DbSet<UserData> UserData { get; set; }
 
         public DbSet<Team> Teams { get; set; }
 
@@ -46,7 +46,7 @@ namespace WorkplacePlanner.Data
                     .HasIndex(t => t.Name)
                     .IsUnique();
 
-            builder.Entity<User>()
+            builder.Entity<UserData>()
                     .HasIndex(u => u.Email)
                     .IsUnique();
         }

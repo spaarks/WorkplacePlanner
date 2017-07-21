@@ -6,6 +6,7 @@ import { throwIfAlreadyLoaded } from './module-import-guard';
 import { AppConfigService } from './services/app-config.service';
 import { MessageService } from './services/message.service';
 import { GrowlMessageComponent } from './growl-message/growl-message.component';
+import { SessionService } from './services/session.service';
 
 
 @NgModule({
@@ -17,7 +18,8 @@ import { GrowlMessageComponent } from './growl-message/growl-message.component';
     ],
     providers: [
         AppConfigService,
-        MessageService
+        MessageService,
+        SessionService
     ],
     exports: [
         GrowlMessageComponent

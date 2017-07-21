@@ -1,13 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace WorkplacePlanner.Data.Entities
 {
-    public class User : BaseEntity
+    public class UserData : BaseEntity
     {
         public int Id { get; set; }
+
+        [Required]
+        [ForeignKey("User")]
+        public int UserId { get; set; }
 
         [Required]
         [MaxLength(50)]
@@ -25,6 +30,6 @@ namespace WorkplacePlanner.Data.Entities
 
         public bool Active { get; set; }
 
-        public ICollection<TeamMembership> TeamMemberships { get; set; }
+        public virtual ApplicationUser User { get; set; }
     }
 }

@@ -48,7 +48,7 @@ namespace WorkplacePlanner.WebApi.Controllers
         [HttpPost]
         public int Post([FromBody]UserDto user)
         {
-            var id = _userService.Create(user);
+            var id = _userService.CreateUserData(user);
             return id;
         }
 

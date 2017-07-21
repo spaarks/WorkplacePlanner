@@ -8,6 +8,8 @@ using WorkplacePlanner.Utills.CustomExceptions;
 using WorkPlacePlanner.Domain.Dtos.User;
 using WorkPlacePlanner.Domain.Dtos.Team;
 using WorkPlacePlanner.Domain.Services;
+using Microsoft.AspNetCore.Identity;
+using System.Threading.Tasks;
 
 namespace WorkplacePlanner.Services
 {
@@ -20,24 +22,25 @@ namespace WorkplacePlanner.Services
             _dataContext = context;
         }
 
-        public int Create(UserDto data)
+        public int CreateUserData(UserDto data)
         {
-            if (_dataContext.Users.Any(u => u.Email == data.Email))
-                throw new DuplicateKeyException(data.Email);
+            if (_dataContext.UserData.Any(u => u.UserId == data.Id))
+                throw new DuplicateKeyException("UserData", "UserId", data.Id.ToString());
 
-            var person = new User
+            var userData = new UserData
             {
+                UserId = data.Id,
                 FirstName = data.FirstName,
                 LastName = data.LastName,
                 Email = data.Email,
                 Active = data.Active
             };
 
-            _dataContext.Users.Add(person);
+            _dataContext.UserData.Add(userData);
             _dataContext.SaveChanges();
 
-            return person.Id;
-        }
+            return userData.Id;
+        } 
 
         public void Delete(int id)
         {
@@ -46,21 +49,23 @@ namespace WorkplacePlanner.Services
 
         public UserDto Get(int id)
         {
-            var person = _dataContext.Users.Find(id);
 
-            if (person == null)
+            var x = _dataContext.Users.Where(u => u.Id == id).Select(u => u.UserData).FirstOrDefault();
+
+            var user = _dataContext.Users.Where(u => u.Id == id)
+                        .Select(u => new UserDto
+                        {
+                            Id = u.Id,
+                            FirstName = u.UserData.FirstName,
+                            LastName = u.UserData.LastName,
+                            Email = u.Email,
+                            Active = u.UserData.Active
+                        }).FirstOrDefault();
+
+            if (user == null)
                 throw new RecordNotFoundException("Person", id);
 
-            var userDto = new UserDto
-            {
-                Id = person.Id,
-                FirstName = person.FirstName,
-                LastName = person.LastName,
-                Email = person.Email,
-                Active = person.Active
-            };
-
-            return userDto;
+            return user;
         }
 
         public ICollection<UserDto> GetAll()
@@ -69,10 +74,10 @@ namespace WorkplacePlanner.Services
                         .Select(p => new UserDto
                         {
                             Id = p.Id,
-                            FirstName = p.FirstName,
-                            LastName = p.LastName,
+                            FirstName = p.UserData.FirstName,
+                            LastName = p.UserData.LastName,
                             Email = p.Email,
-                            Active = p.Active
+                            Active = p.UserData.Active
                         }).ToList();
 
             return peopleList;
@@ -81,14 +86,14 @@ namespace WorkplacePlanner.Services
         public ICollection<UserDto> GetAllActive()
         {
             var peopleList = _dataContext.Users
-                .Where(p => p.Active)
-                       .Select(p => new UserDto
+                .Where(u => u.UserData.Active)
+                       .Select(u => new UserDto
                        {
-                           Id = p.Id,
-                           FirstName = p.FirstName,
-                           LastName = p.LastName,
-                           Email = p.Email,
-                           Active = p.Active
+                           Id = u.Id,
+                           FirstName = u.UserData.FirstName,
+                           LastName = u.UserData.LastName,
+                           Email = u.Email,
+                           Active = u.UserData.Active
                        }).ToList();
 
             return peopleList;
@@ -97,14 +102,14 @@ namespace WorkplacePlanner.Services
         public ICollection<UserLDto> GetAllWithCurrentTeam()
         {
             var peopleList = _dataContext.Users
-                        .Where(p => p.Active)
+                        .Where(p => p.UserData.Active)
                         .Select(p => new UserLDto
                         {
                             Id = p.Id,
-                            FirstName = p.FirstName,
-                            LastName = p.LastName,
+                            FirstName = p.UserData.FirstName,
+                            LastName = p.UserData.LastName,
                             Email = p.Email,
-                            Active = p.Active,
+                            Active = p.UserData.Active,
                             Team = p.TeamMemberships
                             .Where(m =>
                                 m.StartDate <= DateTime.Now
@@ -124,19 +129,21 @@ namespace WorkplacePlanner.Services
 
         public void Update(UserDto data)
         {
-            var person = _dataContext.Users.Find(data.Id);
+            var user = _dataContext.Users.Find(data.Id);
+            if (user == null)
+                throw new RecordNotFoundException("User", data.Id);
 
-            if (person == null)
-                throw new RecordNotFoundException("Person", data.Id);
+            var userData = _dataContext.UserData.Where(ud => ud.UserId == data.Id).FirstOrDefault();
+            if(userData == null)
+                throw new RecordNotFoundException("UserData for user", data.Id);
 
-            person.FirstName = data.FirstName;
-            person.LastName = data.LastName;
-            person.Email = data.Email;
-            person.Active = data.Active;
+            user.Email = data.Email;
+            userData.FirstName = data.FirstName;
+            userData.LastName = data.LastName;
+            userData.Active = data.Active;
+            userData.Email = data.Email;
 
             _dataContext.SaveChanges();
-        }
-
-      
+        }      
     }
 }

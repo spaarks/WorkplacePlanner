@@ -1,0 +1,58 @@
+<div class="app flex-row align-items-center">
+  <div class="container">
+    <div class="row" style="text-align:center;">
+      <div class="col-md-12">
+        <h1>Workplace Planner</h1>
+      </div>
+    </div>
+    <div class="row justify-content-center">
+      <div class="col-md-12">
+        <div class="row justify-content-center">
+          <div class="col-md-6">
+            <div class="card-group mb-0">
+              <div class="card p-4">
+                <div class="card-block">
+                  <form name="form" ngNativeValidate (ngSubmit)="login()">
+                    <h2>Login</h2>
+                    <p class="text-muted">Sign In to your account</p>
+
+                    <div class="input-group mb-3">
+                      <span class="input-group-addon"><i class="icon-user"></i></span>
+                      <input type="text" class="form-control" required maxlength="250" placeholder="Username" name="userName" [(ngModel)]="loginData.userName"
+                        (change)="textChanged()">
+                    </div>
+                    <div class="input-group mb-3">
+                      <span class="input-group-addon"><i class="icon-lock"></i></span>
+                      <input type="password" class="form-control" required maxlength="200" placeholder="Password" name="password" [(ngModel)]="loginData.password"
+                        (change)="textChanged()">
+                    </div>
+                    <div class="input-group mb-3">
+                      <div class="checkbox">
+                        <label for="rememberMe">
+                  <input type="checkbox" id="rememberMe" name="rememberMe" [(ngModel)]="loginData.rememberMe"> Remember me
+                </label>
+                      </div>
+                    </div>
+
+                    <div class="row">
+                      <div class="col-6">
+                        <button type="submit" class="btn btn-primary px-4">Login</button>
+                      </div>
+                    </div>
+                    <div class="row mt-3 mb-0" *ngIf="errorMessage">
+                      <div class="col-12">
+                        <div class="alert alert-danger" role="alert">
+                          {{errorMessage}}
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

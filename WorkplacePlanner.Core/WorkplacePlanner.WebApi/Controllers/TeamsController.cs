@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WorkPlacePlanner.Domain.Services;
 using WorkPlacePlanner.Domain.Dtos.Team;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WorkplacePlanner.WebApi.Controllers
 {
@@ -28,6 +29,7 @@ namespace WorkplacePlanner.WebApi.Controllers
             return teams;
         }
 
+        [Authorize]
         // GET: api/Teams/5
         [HttpGet("{id}")]
         public TeamDto Get(int id)

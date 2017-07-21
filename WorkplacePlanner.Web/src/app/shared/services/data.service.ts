@@ -1,5 +1,6 @@
 ﻿import { Injectable } from '@angular/core';
 import { Http, Response, Headers } from '@angular/http';
+import { Router } from '@angular/router';
 
 import { Observable } from 'rxjs/Rx';
 
@@ -11,20 +12,19 @@ import { QueryStringParam } from '../models/query-string-param';
 export class DataService {
 
     private apiUrl: string;
-    private headers = new Headers({
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-    });
 
-    constructor(private http: Http, private appConfigService: AppConfigService, private messageService: MessageService) {
+    constructor(private http: Http,
+        private appConfigService: AppConfigService,
+        private messageService: MessageService,
+        private router: Router) {
         this.apiUrl = this.appConfigService.getApiUrl();
     }
 
     get(controler: string, action: string = '', urlParams?: string[], param?: QueryStringParam[]): Observable<Response> {
         let url = this.createUrl(controler, action, urlParams, param);
         return this.http
-            .get(url)
-            .catch(res => this.handleException(res.json()));
+            .get(url, { headers: this.getHeaders() })
+            .catch(res => this.handleException(res));
     }
 
     getById(controler: string, action: string = '', id: number): Observable<Response> {
@@ -34,22 +34,22 @@ export class DataService {
     update(controler: string, action: string, data?: any): Observable<Response> {
         let url = this.createUrl(controler, action);
         return this.http
-            .put(url, JSON.stringify(data), { headers: this.headers })
-            .catch(res => this.handleException(res.json()));
+            .put(url, JSON.stringify(data), { headers: this.getHeaders() })
+            .catch(res => this.handleException(res));
     }
 
     updateById(controler: string, action: string, id: number, data?: any): Observable<Response> {
         let url = this.createUrl(controler, action, [id.toString()]);
         return this.http
-            .put(url, JSON.stringify(data), { headers: this.headers })
-            .catch(res => this.handleException(res.json()));
+            .put(url, JSON.stringify(data), { headers: this.getHeaders() })
+            .catch(res => this.handleException(res));
     }
 
     create(controler: string, action: string, data: any): Observable<Response> {
         let url = this.createUrl(controler, action);
         return this.http
-            .post(url, JSON.stringify(data), { headers: this.headers })
-            .catch(res => this.handleException(res.json()));
+            .post(url, JSON.stringify(data), { headers: this.getHeaders() })
+            .catch(res => this.handleException(res));
     }
 
     private createUrl(controler: string, action: string, urlParams?: string[], queryStrParams?: QueryStringParam[]): string {
@@ -59,7 +59,6 @@ export class DataService {
             let urlParamsStr = '';
             urlParams.forEach(param => {
                 urlParamsStr += param + "/"
-
             });
             urlParamsStr = urlParamsStr.slice(0, -1);
             url += '/' + urlParamsStr;
@@ -81,8 +80,28 @@ export class DataService {
         return part1 + (part2 != '' ? '/' + part2 : '');
     }
 
-    private handleException(msg: any) : Observable<Response> {
-        this.messageService.showError(msg.error);
-        return Observable.throw(msg)
+    private handleException(error: Response): Observable<Response> {
+        if (error.status == 401) {
+            localStorage.removeItem("authToken");
+            sessionStorage.removeItem("authToken");
+
+            let link = ['/account/login', { returnUrl: '' } ]; //TODO
+            this.router.navigate(link);
+        } else {
+            this.messageService.showError(error.json());
+        }
+        return Observable.throw(error);
+    }
+
+    private getHeaders(): Headers {
+        var authToken = localStorage.getItem("authToken");
+        if (authToken == null)
+            authToken = sessionStorage.getItem('authToken');
+
+        return new Headers({
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': 'bearer ' + authToken
+        });
     }
 }

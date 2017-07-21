@@ -11,7 +11,7 @@ namespace WorkplacePlanner.Data.Entities
         public int Id { get; set; }
 
         [ForeignKey("User")]
-        public int PersonId { get; set; }
+        public int UserId { get; set; }
 
         [ForeignKey("Team")]
         public int TeamId { get; set; }
@@ -21,7 +21,7 @@ namespace WorkplacePlanner.Data.Entities
 
         public DateTime? EndDate { get; set; }
 
-        public virtual User User { get; set; }
+        public virtual ApplicationUser User { get; set; }
 
         public virtual Team Team { get; set; }
     }

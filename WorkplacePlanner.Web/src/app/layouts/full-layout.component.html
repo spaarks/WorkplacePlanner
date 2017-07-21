@@ -6,6 +6,16 @@
             <a class="nav-link navbar-toggler sidebar-toggler" href="#" appSidebarToggler>&#9776;</a>
         </li>
     </ul>
+
+    <ul class="nav navbar-nav navbar-right" *ngIf="sessionService.user">
+        <li>
+            <a> {{ sessionService.user.email }}</a>
+        </li>
+        <li>
+            <button type="submit" (click)='logout()' class="btn btn-link navbar-btn navbar-link">(Log out)</button>
+        </li>
+    </ul>
+
 </header>
 
 <div class="app-body">

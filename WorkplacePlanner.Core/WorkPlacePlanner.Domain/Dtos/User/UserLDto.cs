@@ -8,5 +8,7 @@ namespace WorkPlacePlanner.Domain.Dtos.User
     public class UserLDto : UserDto
     {
         public TeamXsDto Team { get; set; }
+
+        public string[] Roles { get; set; }
     }
 }

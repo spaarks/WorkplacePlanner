@@ -27,7 +27,7 @@ namespace WorkPlacePlanner.Domain.Services
                 var membership = new TeamMembership
                 {
                     TeamId = members.TeamId,
-                    PersonId = personId,
+                    UserId = personId,
                     StartDate = members.StartDate,
                     EndDate = members.EndDate
                 };
@@ -57,7 +57,7 @@ namespace WorkPlacePlanner.Domain.Services
                         .Where(m => m.TeamId == teamId
                                 && m.StartDate <= date
                                 && (m.EndDate == null || m.EndDate >= date)
-                                && m.User.Active)
+                                && m.User.UserData.Active)
                         .Select(m => new TeamMembershipDto
                         {
                             Id = m.Id,
@@ -65,10 +65,10 @@ namespace WorkPlacePlanner.Domain.Services
                             User = new UserDto
                             {
                                 Id = m.User.Id,
-                                FirstName = m.User.FirstName,
-                                LastName = m.User.LastName,
+                                FirstName = m.User.UserData.FirstName,
+                                LastName = m.User.UserData.LastName,
                                 Email = m.User.Email,
-                                Active = m.User.Active
+                                Active = m.User.UserData.Active
                             }
                         })
                         .OrderBy(m => m.User.FirstName)
@@ -83,7 +83,7 @@ namespace WorkPlacePlanner.Domain.Services
         private void TerminateExistingMemberhips(int[] personIds, DateTime endDate)
         {
             var memberships = _dataContext.TeamMemberships
-                                .Where(m => personIds.Contains(m.PersonId)
+                                .Where(m => personIds.Contains(m.UserId)
                                         && (m.EndDate == null || m.EndDate > endDate));
 
             foreach (var membership in memberships)

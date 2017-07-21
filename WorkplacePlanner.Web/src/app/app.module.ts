@@ -18,15 +18,18 @@ import { TeamsModule } from './teams/teams.module';
 import { MembersModule } from './members/members.module';
 import { ReportsModule } from './reports/reports.module';
 import { CoreModule } from './core/core.module';
+import { AccountModule } from './account/account.module';
 
 import { AppComponent } from './app.component';
 import { FullLayoutComponent } from './layouts/full-layout.component';
+import { EmptyLayoutComponent } from './layouts/empty-layout.component';
 
 // Routing Module
 import { AppRoutingModule } from './app-routing.module';
 
 @NgModule({
   imports: [
+    AccountModule,
     BrowserAnimationsModule,
     BrowserModule,
     AppRoutingModule,
@@ -42,6 +45,7 @@ import { AppRoutingModule } from './app-routing.module';
   ],
   declarations: [
     AppComponent,
+    EmptyLayoutComponent,
     FullLayoutComponent,
     NAV_DROPDOWN_DIRECTIVES,
     BreadcrumbsComponent,

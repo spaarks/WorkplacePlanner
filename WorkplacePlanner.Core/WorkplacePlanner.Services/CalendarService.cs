@@ -34,15 +34,15 @@ namespace WorkplacePlanner.Services
                         .Where(m => m.TeamId == teamId
                             && m.StartDate <= endDate  
                             && (m.EndDate == null || m.EndDate >= startDate))
-                        .OrderBy(m => m.User.FirstName)
-                        .ThenBy(m => m.User.LastName)
+                        .OrderBy(m => m.User.UserData.FirstName)
+                        .ThenBy(m => m.User.UserData.LastName)
                         .Select(m => new CalendarRawDto
                         {
                             User = new UserDto
                             {
                                 Id = m.User.Id,
-                                FirstName = m.User.FirstName,
-                                LastName = m.User.LastName,
+                                FirstName = m.User.UserData.FirstName,
+                                LastName = m.User.UserData.LastName,
                                 Email = m.User.Email
                             },
                             CalendarEntries = m.CalendarEntries
