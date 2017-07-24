@@ -14,7 +14,7 @@ export class TeamService {
     constructor(private dataService: DataService) { }
 
     public create(team: Team): Promise<number> {
-        return this.dataService.create('teams', '', team)
+        return this.dataService.post('teams', '', team)
             .toPromise()
             .then(res => res.json() as number);
     }
@@ -65,7 +65,7 @@ export class TeamService {
     }
 
     public update(team: Team): Promise<any> {
-        return this.dataService.update('teams', '', team)
+        return this.dataService.put('teams', '', team)
             .toPromise();
     }
 

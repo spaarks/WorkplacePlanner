@@ -12,7 +12,7 @@ export class AccountService {
   constructor(private dataService: DataService, private sessionService: SessionService) { }
 
   public login(loginData: LoginData) {
-    return this.dataService.create("account", "login2", loginData)
+    return this.dataService.post("account", "login", loginData)
       .toPromise()
       .then((res) => res.json() as AuthToken)
       .then((token) => {

@@ -635,7 +635,7 @@ namespace WorkplacePlanner.Test
                 context.Database.EnsureDeleted();
 
                 context.Teams.AddRange(GetTeams());
-                context.UserData.AddRange(GetPeople());
+                context.Users.AddRange(GetUsers());
                 context.TeamMemberships.AddRange(GetMemberships());
                 context.CalendarEntries.AddRange(GetCalendarEntriesList());
                 context.Settings.AddRange(GetSettings());
@@ -701,23 +701,23 @@ namespace WorkplacePlanner.Test
             return list;
         }
 
-        private static List<UserData> GetPeople()
+        private static List<ApplicationUser> GetUsers()
         {
-            var list = new List<UserData> {
-                CreatePerson(1, "Alex", "Smith", true, "alex@yopmail.com"),
-                CreatePerson(2, "Glenn", "Maxwell", true, "glen@yopmail.com"),
-                CreatePerson(3, "Adam", "Gilchrist", true, "adam@yopmail.com"),
-                CreatePerson(4, "Steve", "Smith", true, "steve@yopmail.com"),
-                CreatePerson(5, "Mike", "Pence", true, "mike@yopmail.com"),
-                CreatePerson(6, "Yash", "Varma", true, "yash@yopmail.com"),
-                CreatePerson(7, "Andrew", "Flintop", false, "andrew@yopmail.com"),
-                CreatePerson(8, "Ben", "Stoke", true, "ben@yopmail.com"),
-                CreatePerson(9, "Lionel", "Messi", true, "lionel@yopmail.com"),
-                CreatePerson(10, "Leo", "Tolstoy", true, "leo@yopmail.com"),
-                CreatePerson(100, "Sauron", "Manager", true, "Sauron@yopmail.com"),
-                CreatePerson(101, "Prodo", "Manager", true, "Prodo@yopmail.com"),
-                CreatePerson(102, "Bilbo", "Manager", true, "Bilbo@yopmail.com"),
-                CreatePerson(103, "Piping", "Manager", true, "Piping@yopmail.com")
+            var list = new List<ApplicationUser> {
+                CreateUser(1, "Alex", "Smith", true, "alex@yopmail.com"),
+                CreateUser(2, "Glenn", "Maxwell", true, "glen@yopmail.com"),
+                CreateUser(3, "Adam", "Gilchrist", true, "adam@yopmail.com"),
+                CreateUser(4, "Steve", "Smith", true, "steve@yopmail.com"),
+                CreateUser(5, "Mike", "Pence", true, "mike@yopmail.com"),
+                CreateUser(6, "Yash", "Varma", true, "yash@yopmail.com"),
+                CreateUser(7, "Andrew", "Flintop", false, "andrew@yopmail.com"),
+                CreateUser(8, "Ben", "Stoke", true, "ben@yopmail.com"),
+                CreateUser(9, "Lionel", "Messi", true, "lionel@yopmail.com"),
+                CreateUser(10, "Leo", "Tolstoy", true, "leo@yopmail.com"),
+                CreateUser(100, "Sauron", "Manager", true, "Sauron@yopmail.com"),
+                CreateUser(101, "Prodo", "Manager", true, "Prodo@yopmail.com"),
+                CreateUser(102, "Bilbo", "Manager", true, "Bilbo@yopmail.com"),
+                CreateUser(103, "Piping", "Manager", true, "Piping@yopmail.com")
             };
 
             return list;
@@ -846,9 +846,9 @@ namespace WorkplacePlanner.Test
             };
         }
 
-        private static UserData CreatePerson(int id, string firstName, string lastName, bool active, string email)
+        private static ApplicationUser CreateUser(int id, string firstName, string lastName, bool active, string email)
         {
-            return new UserData
+            return new ApplicationUser
             {
                 Id = id,
                 FirstName = firstName,

@@ -18,28 +18,51 @@ namespace WorkplacePlanner.Data
             if (context.Users.Any())
                 return;
 
-            var adminUser = new ApplicationUser { Email = "superadmin@yopmail.com", UserName = "superadmin@yopmail.com" };
+            var adminUser = new ApplicationUser
+            {
+                Email = "superadmin@yopmail.com",
+                UserName = "superadmin@yopmail.com",
+                FirstName = "Super",
+                LastName = "Admin",
+                Active = true
+            };
             var result = await userManager.CreateAsync(adminUser, "Pwd123");
 
-            if (result.Succeeded)
-            {
-                var people = new UserData[]
-                    {
-                    new UserData { UserId=adminUser.Id, FirstName = "Super", LastName="Admin", Email="superadmin@yopmail.com", Active=true}
-                    //new UserData { FirstName = "John", LastName="Smith", Email="john@yupmail.com", Active=true},
-                    //new UserData { FirstName = "Mike", LastName="Pell", Email="mike@yupmail.com", Active=true},
-                    //new UserData { FirstName = "Alex", LastName="Bevan", Email="alex@yupmail.com", Active=true},
-                    //new UserData { FirstName = "David", LastName="Hussey", Email="david@yupmail.com", Active=true},
-                    //new UserData { FirstName = "Adam", LastName="Marsh", Email="adam@yupmail.com", Active=true},
-                    //new UserData { FirstName = "Yash", LastName="Varma", Email="yash@yupmail.com", Active=true},
-                    //new UserData { FirstName = "Ravi", LastName="Weera", Email="ravi@yupmail.com", Active=true},
-                    //new UserData { FirstName = "Sachin", LastName="Smith", Email="sachin@yupmail.com", Active=true},
-                    //new UserData { FirstName = "Virat", LastName="Kohli", Email="virat@yupmail.com", Active=true}
-                    };
+            var settings = new Setting[] {
+                new Setting { Name = "WorkingWeekDays", Value = "1,2,3,4,5" },
+                new Setting { Name = "UnEditableUsageTypes", Value = "NBD,MH" }
+            };
 
-                context.UserData.AddRange(people);
-                context.SaveChanges();
-            }
+            context.Settings.AddRange(settings);
+            context.SaveChanges();
+
+            var holidays = new Holiday[]
+                {
+                    new Holiday{ Date= new DateTime(2017, 5, 9), Reason= "Wesak poya day" },
+                    new Holiday{ Date= new DateTime(2017, 6, 8), Reason= "Poson poya day" },
+                    new Holiday{ Date= new DateTime(2017, 7, 8), Reason= "Asala poya day" }
+                };
+
+            context.Holidays.AddRange(holidays);
+            context.SaveChanges();
+
+            var usageTypes = new UsageType[]
+               {
+                    new UsageType{ Name = "In Office", Description="In office", Abbreviation="IO", ColorCode = "#f5f5f5", Selectable=true, Active=true},
+                    new UsageType{ Name = "Work From Home", Description="Working from home", Abbreviation="WFH", ColorCode = "#4169e1", Selectable=true, Active=true},
+                    new UsageType{ Name = "Out Of Office", Description="Out of office", Abbreviation="OO", ColorCode = "#696969", Selectable=true, Active=true},
+                    new UsageType{ Name = "Non Business Day", Description="Non business day", Abbreviation="NBD", ColorCode = "#b8c0cb", Selectable=false, Active=true},
+                    new UsageType{ Name = "Mercantile Holiday", Description="Mercantile holiday", Abbreviation="MH", ColorCode = "#b8c0cb", Selectable=false, Active=true}
+               };
+
+            context.UsageTypes.AddRange(usageTypes);
+            context.SaveChanges();
+
+            var globalDefaultUsageType = new GlobalDefaultUsageType { UsageTypeId = 1, StartDate = new DateTime(2016, 1, 1) };
+
+            context.GlobalDefaultUsageTypes.Add(globalDefaultUsageType);
+            context.SaveChanges();
+
 
             var teams = new Team[]
                 {
@@ -81,23 +104,7 @@ namespace WorkplacePlanner.Data
 
             //context.TeamMemberships.AddRange(teamMemberships);
             //context.SaveChanges();
-
-            var usageTypes = new UsageType[]
-                {
-                    new UsageType{ Name = "In Office", Description="In office", Abbreviation="IO", ColorCode = "#f5f5f5", Selectable=true, Active=true},
-                    new UsageType{ Name = "Work From Home", Description="Working from home", Abbreviation="WFH", ColorCode = "#4169e1", Selectable=true, Active=true},
-                    new UsageType{ Name = "Out Of Office", Description="Out of office", Abbreviation="OO", ColorCode = "#696969", Selectable=true, Active=true},
-                    new UsageType{ Name = "Non Business Day", Description="Non business day", Abbreviation="NBD", ColorCode = "#b8c0cb", Selectable=false, Active=true},
-                    new UsageType{ Name = "Mercantile Holiday", Description="Mercantile holiday", Abbreviation="MH", ColorCode = "#b8c0cb", Selectable=false, Active=true}
-                };
-
-            context.UsageTypes.AddRange(usageTypes);
-            context.SaveChanges();
-
-            var globalDefaultUsageType = new GlobalDefaultUsageType { UsageTypeId = 1, StartDate = new DateTime(2016, 1, 1) };
-
-            context.GlobalDefaultUsageTypes.Add(globalDefaultUsageType);
-            context.SaveChanges();
+           
 
             var calendarEntries = new CalendarEntry[]
                 {
@@ -116,23 +123,7 @@ namespace WorkplacePlanner.Data
             //context.CalendarEntries.AddRange(calendarEntries);
             //context.SaveChanges();
 
-            var settings = new Setting[] {
-                new Setting { Name = "WorkingWeekDays", Value = "1,2,3,4,5" },
-                new Setting { Name = "UnEditableUsageTypes", Value = "NBD,MH" }
-            };
-
-            context.Settings.AddRange(settings);
-            context.SaveChanges();
-
-            var holidays = new Holiday[]
-                {
-                    new Holiday{ Date= new DateTime(2017, 5, 9), Reason= "Wesak poya day" },
-                    new Holiday{ Date= new DateTime(2017, 6, 8), Reason= "Poson poya day" },
-                    new Holiday{ Date= new DateTime(2017, 7, 8), Reason= "Asala poya day" }
-                };
-
-            context.Holidays.AddRange(holidays);
-            context.SaveChanges();
+           
         }
     }
 }

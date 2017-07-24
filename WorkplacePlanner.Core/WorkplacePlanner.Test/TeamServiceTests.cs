@@ -508,7 +508,7 @@ namespace WorkplacePlanner.Test
                 context.Database.EnsureDeleted();
 
                 context.Teams.AddRange(GetTeams());
-                context.UserData.AddRange(GetPeople());
+                context.Users.AddRange(GetUsers());
                 context.TeamManagers.AddRange(GetTeamManagers());
                 context.TeamDefaultUsageTypes.AddRange(GetTeamDefaultUsageType());
                 context.GlobalDefaultUsageTypes.AddRange(GetGlobalDefaultUsageType());
@@ -534,14 +534,14 @@ namespace WorkplacePlanner.Test
             return listTeams;
         }
 
-        private static List<UserData> GetPeople()
+        private static List<ApplicationUser> GetUsers()
         {
-            var list = new List<UserData> {
-                CreatePerson(1, "Alex", "Smith", true, "alex@yopmail.com"),
-                CreatePerson(2, "Glenn", "Maxwell", true, "glen@yopmail.com"),
-                CreatePerson(3, "Adam", "Gilchrist", true, "adam@yopmail.com"),
-                CreatePerson(4, "Steve", "Smith", true, "steve@yopmail.com"),
-                CreatePerson(5, "Mike", "Pence", true, "mike@yopmail.com")
+            var list = new List<ApplicationUser> {
+                CreateUser(1, "Alex", "Smith", true, "alex@yopmail.com"),
+                CreateUser(2, "Glenn", "Maxwell", true, "glen@yopmail.com"),
+                CreateUser(3, "Adam", "Gilchrist", true, "adam@yopmail.com"),
+                CreateUser(4, "Steve", "Smith", true, "steve@yopmail.com"),
+                CreateUser(5, "Mike", "Pence", true, "mike@yopmail.com")
             };
 
             return list;
@@ -633,9 +633,9 @@ namespace WorkplacePlanner.Test
             };
         }
 
-        private static UserData CreatePerson(int id, string firstName, string lastName, bool active, string email)
+        private static ApplicationUser CreateUser(int id, string firstName, string lastName, bool active, string email)
         {
-            return new UserData
+            return new ApplicationUser
             {
                 Id = id,
                 FirstName = firstName,

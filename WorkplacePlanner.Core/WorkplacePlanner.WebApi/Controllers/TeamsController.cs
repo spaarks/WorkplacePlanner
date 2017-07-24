@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace WorkplacePlanner.WebApi.Controllers
 {
+    [Authorize]
     [Produces("application/json")]
     [Route("api/Teams")]
     public class TeamsController : Controller

@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WorkPlacePlanner.Domain.Services;
 using WorkPlacePlanner.Domain.Dtos.Membership;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WorkplacePlanner.WebApi.Controllers
 {
+    [Authorize]
     [Produces("application/json")]
     [Route("api/Memberships")]
     public class MembershipsController : Controller

@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc;
 using WorkplacePlanner.Services;
 using WorkPlacePlanner.Domain.Dtos.User;
 using WorkPlacePlanner.Domain.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WorkplacePlanner.WebApi.Controllers
 {
+    [Authorize]
     [Produces("application/json")]
     [Route("api/[controller]")]
     public class UsersController : Controller
@@ -42,27 +44,6 @@ namespace WorkplacePlanner.WebApi.Controllers
         {
             var user = _userService.Get(id);
             return user;
-        }
-
-        // POST: api/User
-        [HttpPost]
-        public int Post([FromBody]UserDto user)
-        {
-            var id = _userService.CreateUserData(user);
-            return id;
-        }
-
-        // PUT: api/User/5
-        [HttpPut]
-        public void Put(int id, [FromBody]UserDto user)
-        {
-            _userService.Update(user);
-        }
-        
-        // DELETE: api/ApiWithActions/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
         }
     }
 }

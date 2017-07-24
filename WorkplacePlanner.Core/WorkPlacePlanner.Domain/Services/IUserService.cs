@@ -8,10 +8,6 @@ namespace WorkPlacePlanner.Domain.Services
 {
     public interface IUserService
     {
-        int CreateUserData(UserDto data);
-
-        void Delete(int id);
-
         UserDto Get(int id);
 
         ICollection<UserDto> GetAll();
@@ -19,7 +15,6 @@ namespace WorkPlacePlanner.Domain.Services
         ICollection<UserDto> GetAllActive();
 
         ICollection<UserLDto> GetAllWithCurrentTeam();
-
-        void Update(UserDto data);
+        
     }
 }

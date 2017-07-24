@@ -45,9 +45,16 @@ namespace WorkplacePlanner.Data.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     AccessFailedCount = table.Column<int>(nullable: false),
+                    Active = table.Column<bool>(nullable: false),
                     ConcurrencyStamp = table.Column<string>(nullable: true),
+                    CreatedBy = table.Column<int>(nullable: false),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
                     Email = table.Column<string>(maxLength: 256, nullable: true),
                     EmailConfirmed = table.Column<bool>(nullable: false),
+                    FirstName = table.Column<string>(maxLength: 50, nullable: false),
+                    LastName = table.Column<string>(maxLength: 50, nullable: false),
+                    LastUpdatedBy = table.Column<int>(nullable: false),
+                    LastUpdatedDate = table.Column<DateTime>(nullable: false),
                     LockoutEnabled = table.Column<bool>(nullable: false),
                     LockoutEnd = table.Column<DateTimeOffset>(nullable: true),
                     NormalizedEmail = table.Column<string>(maxLength: 256, nullable: true),
@@ -229,33 +236,6 @@ namespace WorkplacePlanner.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_AspNetUserRoles_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "UserData",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    Active = table.Column<bool>(nullable: false),
-                    CreatedBy = table.Column<int>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    Email = table.Column<string>(maxLength: 200, nullable: false),
-                    FirstName = table.Column<string>(maxLength: 50, nullable: false),
-                    LastName = table.Column<string>(maxLength: 50, nullable: false),
-                    LastUpdatedBy = table.Column<int>(nullable: false),
-                    LastUpdatedDate = table.Column<DateTime>(nullable: false),
-                    UserId = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserData", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_UserData_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
@@ -513,18 +493,6 @@ namespace WorkplacePlanner.Data.Migrations
                 name: "IX_TeamMemberships_UserId",
                 table: "TeamMemberships",
                 column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserData_Email",
-                table: "UserData",
-                column: "Email",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserData_UserId",
-                table: "UserData",
-                column: "UserId",
-                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -561,9 +529,6 @@ namespace WorkplacePlanner.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "TeamManagers");
-
-            migrationBuilder.DropTable(
-                name: "UserData");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

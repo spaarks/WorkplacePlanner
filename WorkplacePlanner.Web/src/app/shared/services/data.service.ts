@@ -31,21 +31,21 @@ export class DataService {
         return this.get(controler, action, [id.toString()]);
     }
 
-    update(controler: string, action: string, data?: any): Observable<Response> {
+    put(controler: string, action: string, data?: any): Observable<Response> {
         let url = this.createUrl(controler, action);
         return this.http
             .put(url, JSON.stringify(data), { headers: this.getHeaders() })
             .catch(res => this.handleException(res));
     }
 
-    updateById(controler: string, action: string, id: number, data?: any): Observable<Response> {
+    putById(controler: string, action: string, id: number, data?: any): Observable<Response> {
         let url = this.createUrl(controler, action, [id.toString()]);
         return this.http
             .put(url, JSON.stringify(data), { headers: this.getHeaders() })
             .catch(res => this.handleException(res));
     }
 
-    create(controler: string, action: string, data: any): Observable<Response> {
+    post(controler: string, action: string, data: any): Observable<Response> {
         let url = this.createUrl(controler, action);
         return this.http
             .post(url, JSON.stringify(data), { headers: this.getHeaders() })

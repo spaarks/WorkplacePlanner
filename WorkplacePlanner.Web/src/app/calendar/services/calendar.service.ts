@@ -43,7 +43,7 @@ export class CalendarService {
     }
 
     updateCalendar(data: CalendarUpdateDto): Promise<any> {
-        return this.dataService.update('calendar', '', data)
+        return this.dataService.put('calendar', '', data)
             .toPromise();
     }
 }

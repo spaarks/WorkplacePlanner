@@ -13,8 +13,6 @@ namespace WorkplacePlanner.Data
         public DataContext(DbContextOptions<DataContext> options) : base(options)
         {
         }
-        
-        public DbSet<UserData> UserData { get; set; }
 
         public DbSet<Team> Teams { get; set; }
 
@@ -44,10 +42,6 @@ namespace WorkplacePlanner.Data
 
             builder.Entity<Setting>()
                     .HasIndex(t => t.Name)
-                    .IsUnique();
-
-            builder.Entity<UserData>()
-                    .HasIndex(u => u.Email)
                     .IsUnique();
         }
 

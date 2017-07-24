@@ -57,7 +57,7 @@ namespace WorkPlacePlanner.Domain.Services
                         .Where(m => m.TeamId == teamId
                                 && m.StartDate <= date
                                 && (m.EndDate == null || m.EndDate >= date)
-                                && m.User.UserData.Active)
+                                && m.User.Active)
                         .Select(m => new TeamMembershipDto
                         {
                             Id = m.Id,
@@ -65,10 +65,10 @@ namespace WorkPlacePlanner.Domain.Services
                             User = new UserDto
                             {
                                 Id = m.User.Id,
-                                FirstName = m.User.UserData.FirstName,
-                                LastName = m.User.UserData.LastName,
+                                FirstName = m.User.FirstName,
+                                LastName = m.User.LastName,
                                 Email = m.User.Email,
-                                Active = m.User.UserData.Active
+                                Active = m.User.Active
                             }
                         })
                         .OrderBy(m => m.User.FirstName)

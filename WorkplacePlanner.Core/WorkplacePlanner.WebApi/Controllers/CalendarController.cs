@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WorkPlacePlanner.Domain.Dtos.Calendar;
 using WorkPlacePlanner.Domain.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WorkplacePlanner.WebApi.Controllers
 {
+    [Authorize]
     [Produces("application/json")]
     [Route("api/Calendar")]
     public class CalendarController : Controller
@@ -40,54 +42,11 @@ namespace WorkplacePlanner.WebApi.Controllers
             _calendarService.UpdateCalendar(data);
         }
 
-        //[HttpGet]
-        //[Route("MetaData")]
-        //public CalendarMetaDataDto GetMetaData([FromQuery]int teamId, [FromQuery]DateTime month, [FromQuery]string x)
-        //{
-        //    var metaData = _calendarService.GetCalendarMetaData(teamId, month);
-        //    return metaData;
-        //}
-
         [HttpGet("UsageTypes")]
         public IEnumerable<UsageTypeDto> GetUsagesType()
         {
             var usageTypes = _calendarService.GetUsageTypes();
             return usageTypes;
         }
-
-        /*
-         
-        // GET: api/Calendar
-        [HttpGet]
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
-
-        // GET: api/Calendar/5
-        [HttpGet("{id}", Name = "Get")]
-        public string Get(int id)
-        {
-            return "value";
-        }
-        
-        // POST: api/Calendar
-        [HttpPost]
-        public void Post([FromBody]string value)
-        {
-        }
-        
-        // PUT: api/Calendar/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
-        {
-        }
-        
-        // DELETE: api/ApiWithActions/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
-        */
     }
 }

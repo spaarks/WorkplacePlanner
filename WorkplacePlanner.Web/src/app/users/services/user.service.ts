@@ -30,13 +30,13 @@ export class UserService {
     }
 
     public createUser(user: User): Promise<number> {
-        return this.dataService.create("account", "register", user)
+        return this.dataService.post("account", "register", user)
             .toPromise()
             .then((res) => { console.log(res); return res.json() as number; });
     }
 
     public login(loginData: LoginData) {
-        return this.dataService.create("account", "login2", loginData)
+        return this.dataService.post("account", "login2", loginData)
             .toPromise()
             .then((res) => res.json() as AuthToken)
             .then((token) => {

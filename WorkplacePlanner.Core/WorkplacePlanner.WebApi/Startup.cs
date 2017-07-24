@@ -66,28 +66,29 @@ namespace WorkplacePlanner.WebApi
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(30);
                 options.Lockout.MaxFailedAccessAttempts = 10;
 
-                //options.ClaimsIdentity = new ClaimsIdentityOptions
-                //{
-                //    UserIdClaimType = ClaimTypes.NameIdentifier,
-                //    UserNameClaimType = ClaimTypes.Email,
-                    
-                //};
-
                 // User settings
                 options.User.RequireUniqueEmail = true;
             });
 
-            services.AddScoped<ISettingsService, SettingsService>();
-            services.AddScoped<ITeamService, TeamService>();
-            services.AddScoped<ICalendarService, CalendarService>();
-            services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IMembershipService, MembershipService>();
+            services.AddTransient<ISettingsService, SettingsService>();
+            services.AddTransient<ITeamService, TeamService>();
+            services.AddTransient<ICalendarService, CalendarService>();
+            services.AddTransient<IUserService, UserService>();
+            services.AddTransient<IMembershipService, MembershipService>();
+            services.AddTransient<IAccountService, AccountService>();
 
             services.Configure<CorsSettings>(Configuration.GetSection("CorsSettings"));
+            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, DataContext context, IOptions<CorsSettings> corsSettings, UserManager<ApplicationUser> userManager)
+        public void Configure(IApplicationBuilder app, 
+            IHostingEnvironment env, 
+            ILoggerFactory loggerFactory, 
+            DataContext context, 
+            IOptions<CorsSettings> corsSettings, 
+            IOptions<AppSettings> appSettings, 
+            UserManager<ApplicationUser> userManager)
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
@@ -99,18 +100,16 @@ namespace WorkplacePlanner.WebApi
             app.UseMiddleware(typeof(ErrorHandlingMiddleware));
             //app.UseMiddleware(typeof(ErrorLoggingMiddleware));
 
-            //app.UseIdentity();
-
             app.UseJwtBearerAuthentication(new JwtBearerOptions()
             {
                 AutomaticAuthenticate = true,
                 AutomaticChallenge = true,
                 TokenValidationParameters = new TokenValidationParameters()
                 {
-                    ValidIssuer = "localhost:4200",
-                    ValidAudience = "localhost:4200",
+                    ValidIssuer = appSettings.Value.AuthTokenIssuerUrl,
+                    ValidAudience = appSettings.Value.AuthTokenIssuerUrl,
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("KeyGoesHere_GetThisFromAppSettings")),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(appSettings.Value.AuthTokenKey)),
                     ValidateLifetime = true
                 }
             });

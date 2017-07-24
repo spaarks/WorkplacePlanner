@@ -127,13 +127,31 @@ namespace WorkplacePlanner.Data.Migrations
 
                     b.Property<int>("AccessFailedCount");
 
+                    b.Property<bool>("Active");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken();
+
+                    b.Property<int>("CreatedBy");
+
+                    b.Property<DateTime>("CreatedDate");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256);
 
                     b.Property<bool>("EmailConfirmed");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(50);
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(50);
+
+                    b.Property<int>("LastUpdatedBy");
+
+                    b.Property<DateTime>("LastUpdatedDate");
 
                     b.Property<bool>("LockoutEnabled");
 
@@ -437,46 +455,6 @@ namespace WorkplacePlanner.Data.Migrations
                     b.ToTable("UsageTypes");
                 });
 
-            modelBuilder.Entity("WorkplacePlanner.Data.Entities.UserData", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<bool>("Active");
-
-                    b.Property<int>("CreatedBy");
-
-                    b.Property<DateTime>("CreatedDate");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(200);
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasMaxLength(50);
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasMaxLength(50);
-
-                    b.Property<int>("LastUpdatedBy");
-
-                    b.Property<DateTime>("LastUpdatedDate");
-
-                    b.Property<int>("UserId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Email")
-                        .IsUnique();
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("UserData");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityRoleClaim<int>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityRole<int>")
@@ -578,14 +556,6 @@ namespace WorkplacePlanner.Data.Migrations
                     b.HasOne("WorkplacePlanner.Data.Entities.ApplicationUser", "User")
                         .WithMany("TeamMemberships")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("WorkplacePlanner.Data.Entities.UserData", b =>
-                {
-                    b.HasOne("WorkplacePlanner.Data.Entities.ApplicationUser", "User")
-                        .WithOne("UserData")
-                        .HasForeignKey("WorkplacePlanner.Data.Entities.UserData", "UserId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
         }

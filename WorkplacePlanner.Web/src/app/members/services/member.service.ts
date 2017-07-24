@@ -21,13 +21,13 @@ export class MemberService {
     }
 
     public addMembers(data: TeamMembersXs) : Promise<any> {
-        return this.dataService.update("memberships", "add", data)
+        return this.dataService.put("memberships", "add", data)
             .toPromise();
     }
 
     public removeMembers(data: MembershipDeleteDto): Promise<any> {
         console.log(data);
-        return this.dataService.update("memberships", "remove", data)
+        return this.dataService.put("memberships", "remove", data)
             .toPromise();
     }
 }

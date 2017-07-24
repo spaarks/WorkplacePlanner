@@ -61,8 +61,8 @@ namespace WorkplacePlanner.Services
                                     .Select(m => new UserDto
                                     {
                                         Id = m.User.Id,
-                                        FirstName = m.User.UserData.FirstName,
-                                        LastName = m.User.UserData.LastName,
+                                        FirstName = m.User.FirstName,
+                                        LastName = m.User.LastName,
                                         Email = m.User.Email
                                     }).ToArray()
                     }).FirstOrDefault();
@@ -91,8 +91,8 @@ namespace WorkplacePlanner.Services
                                     .Select(m => new UserDto
                                     {
                                         Id = m.User.Id,
-                                        FirstName = m.User.UserData.FirstName,
-                                        LastName = m.User.UserData.LastName,
+                                        FirstName = m.User.FirstName,
+                                        LastName = m.User.LastName,
                                         Email = m.User.Email
                                     }).ToArray()
                    }).ToList();
@@ -134,8 +134,8 @@ namespace WorkplacePlanner.Services
                                     .Select(m => new UserDto
                                     {
                                         Id = m.User.Id,
-                                        FirstName = m.User.UserData.FirstName,
-                                        LastName = m.User.UserData.LastName,
+                                        FirstName = m.User.FirstName,
+                                        LastName = m.User.LastName,
                                         Email = m.User.Email
                                     }).ToArray()
                  }).ToList();
